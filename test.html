@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>username's Account</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #222;
+      color: #fff;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .profile-container {
+      background-color: #333;
+      border-radius: 8px;
+      box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+      padding: 20px;
+      width: 400px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .avatar {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      overflow: hidden;
+      margin-right: 20px;
+    }
+    .avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .info {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+    .username {
+      font-size: 24px;
+      font-weight: bold;
+      margin-bottom: 5px;
+      display: flex;
+      align-items: center;
+    }
+    .verified-badge {
+      width: 15px;
+      height: 15px;
+      margin-left: 5px;
+    }
+    .bio {
+      font-style: italic;
+      margin-top: 10px;
+      margin-bottom: 10px;
+    }
+    .balance {
+      font-size: 18px;
+      font-weight: bold;
+    }
+    .quote {
+      font-size: 16px;
+      margin-bottom: 10px;
+    }
+    .signature {
+      font-weight: bold;
+    }
+    .owner-badge {
+      background-color: #007bff;
+      color: #fff;
+      font-size: 14px;
+      padding: 5px 10px;
+      border-radius: 20px;
+      text-transform: uppercase;
+    }
+    @keyframes fadein {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+    .fadein {
+      animation: fadein 1.5s;
+    }
+  </style>
+
+<style>
+    /* Define the glow animation */
+    @keyframes glow {
+      0% {
+        box-shadow: 0 0 10px #000000; /* Set the initial glow color */
+      }
+      50% {
+        box-shadow: 0 0 20px #000000; /* Set the glow color at 50% of the animation */
+      }
+      100% {
+        box-shadow: 0 0 10px #000000; /* Set the glow color at the end of the animation */
+      }
+    }
+  
+    /* Apply the glow animation to the element with the 'glow-effect' class */
+    .glow-effect {
+      animation: glow 5s ease-in-out infinite; /* Set the animation properties */
+    }
+  </style>
+
+<style>
+  /* Pulsating Effect */
+  @keyframes pulsate {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+  }
+
+  .pulsate-effect {
+    animation: pulsate 1s ease-in-out infinite;
+  }
+
+  /* Shaking Effect */
+  @keyframes shake {
+    0% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    50% { transform: translateX(5px); }
+    75% { transform: translateX(-5px); }
+    100% { transform: translateX(0); }
+  }
+
+  .shake-effect {
+    animation: shake 0.5s ease-in-out infinite;
+  }
+
+  /* Floating Effect */
+  @keyframes float {
+    0% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+    100% { transform: translateY(0); }
+  }
+
+  .color-changing {
+  animation: color-change 5s infinite;
+}
+
+@keyframes color-change {
+  0% { color: rgb(2, 2, 2); } /* Start color */
+  25% { color: rgb(255, 255, 255); } /* Mid color */
+  50% { color: rgb(0, 0, 0); } /* Mid color */
+  75% { color: rgb(255, 255, 255); } /* Mid color */
+  100% { color: rgb(0, 0, 0); } /* End color */
+}
+
+</style>
+
+  
+</head>
+<body>
+  <div class="profile-container fadein">
+    <div class="avatar glow-effect">
+      <img src="https://i.pinimg.com/originals/27/1a/40/271a40e8e1b536324f1f75aed61e7284.gif" alt="Avatar pulsate-effect">
+    </div>
+    <div class="info">
+      <div class="username color-changing">test <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e4/Twitter_Verified_Badge.svg/800px-Twitter_Verified_Badge.svg.png" alt="Verified Badge" class="verified-badge"></div>
+      <div class="bio">?</div>
+    </div>
+    <div class="owner-badge">Bot</div>
+  </div>
+</body>
+</html>

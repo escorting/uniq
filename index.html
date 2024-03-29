@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Profile</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #222;
+      color: #fff;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      height: 100vh;
+    }
+    .search-container {
+      position: relative;
+      margin-bottom: 20px;
+    }
+    .search-input {
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      width: 300px;
+      box-sizing: border-box;
+      font-size: 16px;
+      background-color: #333;
+      color: #fff;
+    }
+    .search-results {
+      position: absolute;
+      top: 40px;
+      left: 0;
+      z-index: 1;
+      width: 100%;
+      max-height: 200px;
+      overflow-y: auto;
+      background-color: #333;
+      border: 1px solid #555;
+      border-radius: 5px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+      display: none;
+    }
+    .search-results.active {
+      display: block;
+    }
+    .search-item {
+      padding: 10px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    .search-item:hover {
+      background-color: #555;
+    }
+    .profile-container {
+      background-color: #333;
+      border-radius: 8px;
+      box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+      padding: 20px;
+      width: 400px;
+      display: none;
+    }
+    .profile-container.active {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .avatar {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      overflow: hidden;
+      margin-right: 20px;
+    }
+    .avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .info {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+    .username {
+      font-size: 24px;
+      font-weight: bold;
+      margin-bottom: 5px;
+      display: flex;
+      align-items: center;
+    }
+    .verified-badge {
+      width: 15px;
+      height: 15px;
+      margin-left: 5px;
+    }
+    .bio {
+      font-style: italic;
+      margin-top: 10px;
+      margin-bottom: 10px;
+    }
+    .balance {
+      font-size: 18px;
+      font-weight: bold;
+    }
+    .quote {
+      font-size: 16px;
+      margin-bottom: 10px;
+    }
+    .signature {
+      font-weight: bold;
+    }
+    .owner-badge {
+      background-color: #007bff;
+      color: #fff;
+      font-size: 14px;
+      padding: 5px 10px;
+      border-radius: 20px;
+      text-transform: uppercase;
+    }
+    @keyframes fadein {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+    .fadein {
+      animation: fadein 1.5s;
+    }
+  </style>
+</head>
+<body>
+  <div class="search-container fadein">
+    <input type="text" class="search-input" placeholder="Search for accounts...">
+    <div class="search-results"></div>
+  </div>
+  <div class="profile-container fadein">
+    <div class="avatar">
+      <img src="https://i.pinimg.com/originals/ca/06/6b/ca066bcd2fa82bfe3b537ce5de33b932.gif" alt="Avatar">
+    </div>
+    <div class="info">
+      <div class="username">lost <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e4/Twitter_Verified_Badge.svg/800px-Twitter_Verified_Badge.svg.png" alt="Verified Badge" class="verified-badge"></div>
+      <div class="bio">$100,000</div>
+      <div class="balance">Balance: $50,000</div>
+      <div class="quote">"The only way to do great work is to love what you do."</div>
+      <div class="signature">- Steve Jobs</div>
+    </div>
+    <div class="owner-badge">Owner</div>
+  </div>
+
+  <script>
+    const searchInput = document.querySelector('.search-input');
+    const searchResults = document.querySelector('.search-results');
+  
+    // Function to render search results
+    function renderSearchResults(results) {
+      searchResults.innerHTML = '';
+      results.forEach(result => {
+        const searchItem = document.createElement('div');
+        searchItem.classList.add('search-item');
+        searchItem.textContent = result;
+        searchItem.addEventListener('click', () => {
+          // Redirect to the selected account's HTML file
+          window.location.href = result + '.html';
+        });
+        searchResults.appendChild(searchItem);
+      });
+      searchResults.classList.add('active');
+    }
+  
+    // Simulated accounts data (without the ".html" extension)
+    const accounts = ['evil', 'test'];
+  
+    // Event listener for search input
+    searchInput.addEventListener('input', () => {
+      const searchText = searchInput.value.toLowerCase();
+      const filteredAccounts = accounts.filter(account => account.toLowerCase().includes(searchText));
+      renderSearchResults(filteredAccounts);
+    });
+  
+    // Close search results when clicking outside the search container
+    document.addEventListener('click', (event) => {
+      if (!event.target.closest('.search-container')) {
+        searchResults.classList.remove('active');
+      }
+    });
+  </script>
+  
+  
+</body>
+</html>
