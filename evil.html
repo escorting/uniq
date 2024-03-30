@@ -1,200 +1,265 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Lost's Account</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #222;
-      color: #fff;
-      margin: 0;
-      padding: 0;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-    }
-    .profile-container {
-      background-color: #333;
-      border-radius: 8px;
-      box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
-      padding: 20px;
-      width: 400px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .avatar {
-      width: 100px;
-      height: 100px;
-      border-radius: 50%;
-      overflow: hidden;
-      margin-right: 20px;
-    }
-    .avatar img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-    .info {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-    }
-    .username {
-      font-size: 24px;
-      font-weight: bold;
-      margin-bottom: 5px;
-      display: flex;
-      align-items: center;
-    }
-    .verified-badge {
-      width: 15px;
-      height: 15px;
-      margin-left: 5px;
-    }
-    .bio {
-      font-style: italic;
-      margin-top: 10px;
-      margin-bottom: 10px;
-    }
-    .balance {
-      font-size: 18px;
-      font-weight: bold;
-    }
-    .quote {
-      font-size: 16px;
-      margin-bottom: 10px;
-    }
-    .signature {
-      font-weight: bold;
-    }
-    .owner-badge {
-      background-color: #000000;
-      color: #fff;
-      font-size: 14px;
-      padding: 5px 10px;
-      border-radius: 20px;
-      text-transform: uppercase;
-    }
-    @keyframes fadein {
-      from { opacity: 0; }
-      to   { opacity: 1; }
-    }
-    .fadein {
-      animation: fadein 1.5s;
-    }
-  </style>
-
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lost's Account</title>
 <style>
-  /* Define the glow animation */
-  @keyframes glow {
-    0% {
-      box-shadow: 0 0 10px #000000; /* Set the initial glow color */
-    }
-    50% {
-      box-shadow: 0 0 20px #000000; /* Set the glow color at 50% of the animation */
-    }
-    100% {
-      box-shadow: 0 0 10px #000000; /* Set the glow color at the end of the animation */
-    }
+  body {
+    font-family: Arial, sans-serif;
+    background-color: #222;
+    color: #fff;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+  }
+  .profile-container {
+    background-color: #333;
+    border-radius: 8px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+    padding: 20px;
+    width: 400px;
+    display: flex;
+    flex-direction: column; /* Adjusted to stack elements vertically */
+    align-items: center; /* Center align profile elements */
+    animation: fadein 1.5s; /* Apply fade-in animation to the profile container */
+  }
+  .avatar {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    overflow: hidden;
+    margin-bottom: 20px; /* Added margin for spacing */
+  }
+  .avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center; /* Center align text */
+    opacity: 0; /* Initially hide the text */
+    animation: fadein 1.5s forwards; /* Apply fade-in animation to the text */
+  }
+  .username {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 5px;
+    display: flex;
+    align-items: center;
+  }
+  .verified-badge {
+    width: 15px;
+    height: 15px;
+    margin-left: 5px;
+  }
+  .bio {
+    font-style: italic;
+    margin-top: 10px;
+    margin-bottom: 10px;
+  }
+  .balance {
+    font-size: 18px;
+    font-weight: bold;
+  }
+  .quote {
+    font-size: 16px;
+    margin-bottom: 10px;
+  }
+  .signature {
+    font-weight: bold;
+  }
+  .owner-badge,
+  .founder-badge {
+    background-color: #000000;
+    color: #fff;
+    font-size: 14px;
+    padding: 5px 10px;
+    border-radius: 20px;
+    text-transform: capitalize;
+    margin-top: 100px; /* Adjusted margin for spacing */
+    transition: transform 0.3s; /* Add transition for smoother zoom effect */
+  }
+  .owner-badge:hover,
+  .founder-badge:hover {
+    transform: scale(1.1); /* Zoom in effect on hover */
+  }
+  .badge-container {
+    display: flex;
+    margin-top: 10px; /* Added margin for spacing */
+  }
+  .owner-badge {
+    margin-right: 360px; /* Added margin to separate badges */
+    margin-top: -195px;
+    margin-inline-end: 360px;
+    margin-block-end: auto;
   }
 
-  /* Apply the glow animation to the element with the 'glow-effect' class */
-  .glow-effect {
-    animation: glow 1s ease-in-out infinite; /* Set the animation properties */
+  @keyframes fadein {
+    from { opacity: 0; }
+    to   { opacity: 1; }
   }
-</style>
 
-<style>
-/* Pulsating Effect */
-@keyframes pulsate {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.1); }
-  100% { transform: scale(1); }
-}
+  /* Styling for the modal */
+  .modal {
+    display: none; /* Hide the modal by default */
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.8); /* Semi-transparent background */
+  }
 
-.pulsate-effect {
-  animation: pulsate 1s ease-in-out infinite;
-}
+  .modal-content {
+    background-color: transparent; /* Transparent modal content */
+    margin: 20% auto;
+    padding: 25px;
+    border: none;
+    width: 80%;
+    text-align: center;
+  }
 
-/* Shaking Effect */
-@keyframes shake {
-  0% { transform: translateX(0); }
-  25% { transform: translateX(-5px); }
-  50% { transform: translateX(5px); }
-  75% { transform: translateX(-5px); }
-  100% { transform: translateX(0); }
-}
+  .glowing-text {
+    color: #fff; /* Set text color */
+    text-shadow: 0 0 10px #ffffff, 0 0 20px #ffffff; /* Adjust glow color and intensity */
+  }
 
-.shake-effect {
-  animation: shake 0.5s ease-in-out infinite;
-}
+  /* Button styles */
+  button {
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    padding: 5px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.1s ease;
+    opacity: 0; /* Initially hide the button */
+    animation: fadein 4s forwards; /* Apply fade-in animation to the button */
+    animation-delay: 2s; /* Delay the button animation */
+  }
 
-.border-animation {
+  button:hover {
+    background-color: #0056b3;
+  }
+
+
+  .glitch-text {
   position: relative;
+  font-size: 36px;
+  color: #00ff00;
 }
 
-.border-animation::after {
-  content: '';
+.glitch-text::before,
+.glitch-text::after {
+  content: attr(data-text);
   position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 21%;
-  height: 1px;
-  background-color: #000000;
-  animation: border-animation 2s infinite;
-}
-
-@keyframes border-animation {
-  0% { transform: scaleX(0); }
-  50% { transform: scaleX(1); }
-  100% { transform: scaleX(0); }
-}
-
-.underline-animation {
-  position: relative;
-}
-
-.underline-animation::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
+  top: 0;
   left: 0;
   width: 100%;
-  height: 2px;
-  background-color: #00ffff; /* Adjust underline color as needed */
-  animation: underline-animation 2s infinite alternate;
+  height: 100%;
+  clip: rect(0, 1000px, 0, 0);
+  overflow: hidden;
 }
 
-@keyframes underline-animation {
-  0% { transform: scaleX(0); }
-  100% { transform: scaleX(1); }
+.glitch-text::before {
+  left: 2px;
+  text-shadow: -1px 0 red;
+  animation: glitch-anim 2s infinite linear alternate-reverse;
 }
 
-.glowing-text {
-  color: #fff; /* Set text color */
-  text-shadow: 0 0 10px #ffffff, 0 0 20px #ffffff; /* Adjust glow color and intensity */
+.glitch-text::after {
+  left: -2px;
+  text-shadow: -1px 0 blue;
+  animation: glitch-anim 2s infinite linear alternate;
+}
+
+@keyframes glitch-anim {
+  0% {
+    transform: translateY(-2px);
+  }
+  100% {
+    transform: translateY(2px);
+  }
 }
 
 
+    /* Define the glow animation */
+    @keyframes glow {
+      0% {
+        box-shadow: 0 0 10px #000000; /* Set the initial glow color */
+      }
+      50% {
+        box-shadow: 0 0 20px #000000; /* Set the glow color at 50% of the animation */
+      }
+      100% {
+        box-shadow: 0 0 10px #000000; /* Set the glow color at the end of the animation */
+      }
+    }
+  
+    /* Apply the glow animation to the element with the 'glow-effect' class */
+    .glow-effect {
+      animation: glow s ease-in-out infinite; /* Set the animation properties */
+    }
 
 
+
+
+
+
+  
 </style>
-
 </head>
 <body>
   <div class="profile-container fadein">
-    <div class="avatar glow-effect ">
-      <img src="https://i.pinimg.com/564x/67/b6/78/67b6784d85c2c0fb96d7dc6203627b49.jpg" alt="Avatar">
+    <div class="avatar glow-effect">
+      <img src="https://i.pinimg.com/474x/ca/8d/dc/ca8ddc5c4290409f84ac919bf459e238.jpg" alt="Avatar">
     </div>
     <div class="info">
-      <div class="username glowing-text">soul </div>
+      <div class="username glowing-text">e<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e4/Twitter_Verified_Badge.svg/800px-Twitter_Verified_Badge.svg.png" alt="Verified Badge" class="verified-badge"></div>
       <div class="bio"></div>
     </div>
-    <div class="owner-badge">Owner</div>
+    <div class="badge-container">
+      <div class="owner-badge">founder</div>
+      
+    </div>
   </div>
+
+   <!-- Modal popup -->
+   <div id="myModal" class="modal">
+    <div class="modal-content">
+      <h2></h2>
+      <p>This page contains audio.</p>
+      <button id="playBtn">Play</button>
+    </div>
+  </div>
+
+
+  
+
+  <!-- Script to handle the modal and audio playback -->
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      var modal = document.getElementById("myModal");
+      var playBtn = document.getElementById("playBtn");
+
+      // Display the modal
+      modal.style.display = "block";
+
+      // Play the audio when the play button is clicked
+      playBtn.onclick = function() {
+        modal.style.display = "none";
+        var audio = new Audio('mos.mp3'); // Replace '202.mp3' with your audio file path
+        audio.play();
+      }
+    });
+  </script>
 </body>
 </html>

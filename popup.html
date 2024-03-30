@@ -1,0 +1,100 @@
+<!-- popup.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Audio Popup</title>
+<style>
+  /* Modern pop-up styles */
+  .modal {
+    display: none;
+    position: fixed;
+    z-index: 9999;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+  }
+
+  .modal-content {
+    background-color: #333;
+    margin: 20% auto;
+    padding: 20px;
+    border-radius: 8px;
+    width: 50%;
+    max-width: 400px;
+    text-align: center;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+  }
+
+  .close {
+    color: #aaa;
+    float: right;
+    font-size: 24px;
+    font-weight: bold;
+    cursor: pointer;
+  }
+
+  .close:hover,
+  .close:focus {
+    color: #fff;
+    text-decoration: none;
+  }
+
+  /* Button styles */
+  .btn {
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+
+  .btn:hover {
+    background-color: #0056b3;
+  }
+</style>
+</head>
+<body>
+  <div id="myModal" class="modal">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <h2>Listen to the Music</h2>
+      <p>This page contains audio. Would you like to listen?</p>
+      <button id="playBtn" class="btn">Play</button>
+    </div>
+  </div>
+
+  <script>
+    // Get the modal
+    var modal = document.getElementById("myModal");
+
+    // Get the close button
+    var closeBtn = document.getElementsByClassName("close")[0];
+
+    // When the user clicks on the close button, close the modal
+    closeBtn.onclick = function() {
+      modal.style.display = "none";
+    }
+
+    // When the user clicks anywhere outside of the modal, close it
+    window.onclick = function(event) {
+      if (event.target == modal) {
+        modal.style.display = "none";
+      }
+    }
+
+    // Play the audio when the play button is clicked
+    document.getElementById("playBtn").onclick = function() {
+      modal.style.display = "none";
+      var audio = new Audio('202.mp3'); // Replace '202.mp3' with your audio file path
+      audio.play();
+    }
+  </script>
+</body>
+</html>
