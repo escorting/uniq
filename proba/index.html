@@ -309,7 +309,7 @@ button { cursor: pointer; }
 
 /* United Kingdom */
 .pf.uk::before { display: none; }
-.pf.uk.rear {
+.pf.uk.front {
   background:
     linear-gradient(180deg, rgba(255,255,255,.5), rgba(255,255,255,0) 36%, rgba(0,0,0,.07) 100%),
     repeating-linear-gradient(62deg, rgba(60,40,0,.03) 0 .25cqw, transparent .25cqw 1.1cqw),
@@ -1348,7 +1348,7 @@ const I18N = {
     ],
     facts_uk: [
       ['Формат 2001 года', 'С сентября 2001 года номер состоит из кода памяти, двух цифр года и трёх случайных букв, например BD51 SMR.'],
-      ['Перед и зад', 'Передний номер белый, задний — жёлтый. С 2021 года на полосе пишут UK вместо GB, а зелёная полоса отмечает машины без выхлопа.'],
+      ['Полоса UK', 'С 2021 года на полосе пишут UK вместо GB, а зелёная полоса отмечает машины без выхлопа.'],
       ['Номера-слова', 'Британцы любят номера, которые читаются как слова: цифры заменяют буквы (5 — S, 1 — I или L), и BO55 превращается в BOSS. Личные номера продают DVLA и частные дилеры.'],
     ],
     facts_ae: [
@@ -1361,7 +1361,7 @@ const I18N = {
       reeval: ['Переоценка', 'Эксперт заново проходит номер с учётом настроения рынка: цена может вырасти или немного снизиться. Три заряда, каждый восстанавливается за 45 секунд.'],
       ride: ['Прокатиться', 'Выберите в гараже машину с номером и выезжайте в город. Чем реже номер и престижнее машина, тем ярче встреча. Раз в 20 секунд.'],
       lock: ['Закрепить регион', 'Новые номера будут выпадать только в выбранном регионе или коде.'],
-      side: ['Перед или зад', 'Передний британский номер белый, задний — жёлтый.'],
+      side: ['Перед или зад', 'Передний номер — жёлтый, задний — белый.'],
       method: ['Как считается цена', 'База — цена обычного номера в местной валюте. Каждая закономерность умножает её; справа — сколько добавил каждый фактор. Уровни считаются по рублёвому эквиваленту, значения выше 200 млн ₽ сглаживаются.'],
       c_ru: ['Россия', 'Буква, три цифры, две буквы и код региона. Ценятся повторы и «блатные» серии.'],
       c_uk: ['Британия', 'Код памяти, год выпуска и три буквы. Ценятся номера-слова и имена.'],
@@ -1430,7 +1430,7 @@ const I18N = {
     ],
     facts_uk: [
       ['The 2001 format', 'Since September 2001 a plate is a memory tag, a two-digit age identifier and three random letters, for example BD51 SMR.'],
-      ['Front and rear', 'Front plates are white and rear plates yellow. Since 2021 the band reads UK instead of GB, and a green flash marks zero-emission cars.'],
+      ['The UK band', 'Since 2021 the band reads UK instead of GB, and a green flash marks zero-emission cars.'],
       ['Plates that spell', 'Buyers love plates that read as words, with digits standing in for letters (5 for S, 1 for I or L), so BO55 becomes BOSS. DVLA and private dealers sell personalised plates.'],
     ],
     facts_ae: [
@@ -1443,7 +1443,7 @@ const I18N = {
       reeval: ['Re-evaluate', 'The appraiser re-reads the plate against market sentiment, so the price can rise or dip slightly. Three charges, each recharging in 45 seconds.'],
       ride: ['Ride Around', 'Pick a car with a plate in your garage and take it into town. Rarer plates and more prestigious cars lead to bigger moments. Once every 20 seconds.'],
       lock: ['Lock region', 'New plates will only be issued in the selected region or code.'],
-      side: ['Front or rear', 'UK front plates are white, rear plates yellow.'],
+      side: ['Front or rear', 'Front plates are yellow, rear plates white.'],
       method: ['How the price works', 'The base is an everyday plate’s price in local currency. Each pattern multiplies it, and the right column shows what each factor added. Tiers use the ruble equivalent; values above ₽200M are smoothed.'],
       c_ru: ['Russia', 'A letter, three digits, two letters and a region code. Repeats and “connected” series are prized.'],
       c_uk: ['United Kingdom', 'Memory tag, age identifier and three letters. Plates that spell words and names are prized.'],
@@ -3142,8 +3142,8 @@ function drawPlateRU(g, p, x, y, w) {
   plateGloss(g, x, y, w, h, u);
 }
 function drawPlateUK(g, p, x, y, w) {
-  const rear = p.side !== 'f';
-  const { h, u } = plateBase(g, x, y, w, rear ? [[0, '#ffe56b'], [.4, '#ffd629'], [1, '#e8b600']] : [[0, '#ffffff'], [.4, '#f6f7f3'], [1, '#e6e8e2']]);
+  const yellow = p.side === 'f';
+  const { h, u } = plateBase(g, x, y, w, yellow ? [[0, '#ffe56b'], [.4, '#ffd629'], [1, '#e8b600']] : [[0, '#ffffff'], [.4, '#f6f7f3'], [1, '#e6e8e2']]);
   const bx = x + .9 * u, by = y + .9 * u, bw = 9.4 * u, bh = h - 1.8 * u;
   rr(g, bx, by, bw, bh, 1.5 * u); g.fillStyle = '#1f42a0'; g.fill();
   const fx = bx + (bw - 6.4 * u) / 2, fy = by + 2.2 * u, fw = 6.4 * u, fh = 3.8 * u;
