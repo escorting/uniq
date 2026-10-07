@@ -4,14 +4,14 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Reg Hustle</title>
-<meta name="description" content="Reg Hustle: a hard UK number-plate trading game. Haggle plates off people, sell them on, open packs and clear your debt to Del by day 30.">
+<meta name="description" content="Reg Hustle: build a UK number-plate business. Haggle plates off people, sell to private clients, bid in live auctions, open packs, buy cars and hire them out.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Big+Shoulders+Display:wght@700;800;900&family=Instrument+Sans:wght@400;500;600;700&display=swap">
 <style>
 /* Layout: a lock-up yard at night. A HUD strip edged in double yellow lines,
    road-bay tabs, kerb-grey cards, and real UK plates as the hero object.
-   Pack opening happens on a dark stage that looks the same in both themes. */
+   Pack opening, auctions' urgency and the cruise scene keep one stage look in both themes. */
 :root {
   --bg: #111417;
   --surface: #191e23;
@@ -28,7 +28,7 @@
   --shadow: 0 14px 40px rgba(0, 0, 0, .45);
   --r0: #9aa5b1; --r1: #46c98e; --r2: #4f9cff; --r3: #b37dff; --r4: #ffae35; --r5: #ff5280;
 
-  /* physical objects: plates, packs and the stage keep one look in every theme */
+  /* physical objects: plates, packs, cars and the stage keep one look in every theme */
   --plate: #f7c52a;
   --plate-ink: #121314;
   --band: #1d47a6;
@@ -36,6 +36,7 @@
   --stage-2: #14181d;
   --stage-ink: #f1f3f5;
   --stage-ink-2: #9aa4ae;
+  --stage-line: #333c46;
   --s0: #9aa5b1; --s1: #46c98e; --s2: #4f9cff; --s3: #b37dff; --s4: #ffae35; --s5: #ff5280;
 
   --f-display: "Big Shoulders Display", "Arial Narrow", Impact, sans-serif;
@@ -69,7 +70,6 @@ body { margin: 0; background: var(--bg); color: var(--ink); font: 400 15px/1.5 v
 button, input, select { font: inherit; color: inherit; }
 button { cursor: pointer; }
 :focus-visible { outline: 2px solid var(--hi); outline-offset: 2px; }
-.num { font-family: var(--f-plate); font-variant-numeric: tabular-nums; letter-spacing: .01em; }
 .muted { color: var(--ink-2); }
 .good { color: var(--good); }
 .bad { color: var(--bad); }
@@ -83,26 +83,27 @@ button { cursor: pointer; }
 .brand { display: flex; align-items: center; gap: 8px; font: 900 26px/1 var(--f-display); text-transform: uppercase; letter-spacing: .02em; white-space: nowrap; }
 .brand b { background: var(--plate); color: var(--plate-ink); padding: 3px 7px 1px; border-radius: 4px; box-shadow: inset 0 0 0 2px rgba(0,0,0,.6); }
 .stat { display: grid; gap: 1px; min-width: 0; }
-.stat small { font-size: 10.5px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-3); }
+.stat small { font-size: 10.5px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-3); white-space: nowrap; }
 .stat .v { font: 600 22px/1 var(--f-plate); font-variant-numeric: tabular-nums; white-space: nowrap; }
-.stat .v.debt { color: var(--bad); }
-.stat .v.clear { color: var(--good); }
+.stat .tied { font-size: 11.5px; color: var(--warn); white-space: nowrap; }
+.lvl { display: grid; gap: 4px; min-width: 150px; }
+.lvl .bar { height: 6px; border-radius: 3px; background: var(--line); overflow: hidden; }
+.lvl .bar i { display: block; height: 100%; background: var(--plate); border-radius: 3px; }
 .hud-sp { flex: 1; }
-.hud-acts { display: flex; gap: 8px; align-items: center; }
 .icon-btn { width: 40px; height: 40px; display: grid; place-items: center; border-radius: 10px; border: 1px solid var(--line); background: var(--raised); }
 .icon-btn svg { width: 20px; height: 20px; }
-
 .trend { max-width: 1180px; margin: 8px auto 0; display: flex; gap: 6px 14px; flex-wrap: wrap; align-items: baseline; font-size: 13px; color: var(--ink-2); }
 .trend b { font-weight: 600; }
 .trend .up { color: var(--good); }
 .trend .dn { color: var(--bad); }
 
 /* ---------- tabs ---------- */
-.tabs { max-width: 1180px; width: 100%; margin: 0 auto; padding: 0 16px; display: flex; gap: 4px; }
-.tabs button { flex: 0 0 auto; display: flex; align-items: center; gap: 8px; padding: 12px 14px 10px; border: 0; background: none; color: var(--ink-2); font-weight: 600; border-bottom: 3px solid transparent; }
-.tabs button svg { width: 18px; height: 18px; }
+.tabs { max-width: 1180px; width: 100%; margin: 0 auto; padding: 0 16px; display: flex; gap: 2px; }
+.tabs button { flex: 0 0 auto; display: flex; align-items: center; gap: 8px; padding: 12px 13px 10px; border: 0; background: none; color: var(--ink-2); font-weight: 600; border-bottom: 3px solid transparent; position: relative; }
+.tabs button svg { width: 18px; height: 18px; flex: none; }
 .tabs button[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--plate); }
-.tabs .badge { font: 600 12px/1 var(--f-plate); background: var(--raised); border: 1px solid var(--line); padding: 3px 6px; border-radius: 999px; }
+.tabs .dot { margin-left: -2px; min-width: 17px; height: 17px; padding: 0 4px; border-radius: 9px; background: var(--plate); color: var(--plate-ink); font: 700 11px/17px var(--f-body); text-align: center; }
+.tabs .dot:empty { display: none; }
 
 main { flex: 1; width: 100%; max-width: 1180px; margin: 0 auto; padding-block: 18px 110px; padding-inline: 16px; }
 
@@ -120,16 +121,26 @@ main { flex: 1; width: 100%; max-width: 1180px; margin: 0 auto; padding-block: 1
 .pill.bad { color: var(--bad); border-color: color-mix(in srgb, var(--bad) 45%, transparent); }
 .pill.warn { color: var(--warn); border-color: color-mix(in srgb, var(--warn) 45%, transparent); }
 .tier { font: 700 10.5px/1 var(--f-body); letter-spacing: .1em; text-transform: uppercase; color: var(--tc); border: 1px solid color-mix(in srgb, var(--tc) 55%, transparent); padding: 4px 7px 3px; border-radius: 999px; white-space: nowrap; }
-.h { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; margin: 28px 0 12px; font: 800 30px/1 var(--f-display); text-transform: uppercase; letter-spacing: .01em; text-wrap: balance; }
+.h { display: flex; align-items: baseline; gap: 6px 12px; flex-wrap: wrap; margin: 28px 0 12px; font: 800 30px/1 var(--f-display); text-transform: uppercase; letter-spacing: .01em; text-wrap: balance; }
 .h:first-child { margin-top: 4px; }
-.h small { font: 500 14px/1.3 var(--f-body); text-transform: none; color: var(--ink-2); letter-spacing: 0; }
+.h small { font: 500 14px/1.35 var(--f-body); text-transform: none; color: var(--ink-2); letter-spacing: 0; }
 .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; align-items: start; }
-.empty { padding: 28px 18px; text-align: center; color: var(--ink-2); border: 1px dashed var(--line); border-radius: 14px; }
+.empty { padding: 26px 18px; text-align: center; color: var(--ink-2); border: 1px dashed var(--line); border-radius: 14px; margin: 0; }
 .kv { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 0; }
 .kv dt { font-size: 10.5px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-3); }
 .kv dd { margin: 2px 0 0; font: 600 20px/1.1 var(--f-plate); font-variant-numeric: tabular-nums; }
+.kv dd.txt { font: 600 15px/1.3 var(--f-body); }
 .kv.three { grid-template-columns: repeat(3, 1fr); }
 .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.between { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+.seg { display: flex; flex-wrap: wrap; gap: 6px; }
+.seg button { min-height: 36px; padding: 0 12px; border-radius: 9px; border: 1px solid var(--line); background: var(--raised); font-weight: 600; font-size: 13.5px; }
+.seg button[aria-pressed="true"] { background: var(--plate); color: var(--plate-ink); border-color: transparent; }
+.subtabs { margin-bottom: 16px; }
+.cd { font-family: var(--f-plate); font-variant-numeric: tabular-nums; }
+.intro { display: grid; gap: 10px; padding: 16px; border-radius: 14px; border: 1px solid color-mix(in srgb, var(--plate) 55%, transparent); background: color-mix(in srgb, var(--plate) 8%, var(--surface)); margin-bottom: 14px; }
+.intro p { margin: 0; max-width: 70ch; }
+.intro b { font-weight: 600; }
 
 /* ---------- plate ---------- */
 .plate { container-type: inline-size; width: 100%; }
@@ -144,27 +155,33 @@ main { flex: 1; width: 100%; max-width: 1180px; margin: 0 auto; padding-block: 1
 .pl::after { content: ""; position: absolute; inset: 0; background: linear-gradient(115deg, transparent 30%, rgba(255,255,255,.28) 44%, transparent 56%); pointer-events: none; }
 .pl .stamp { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%) rotate(-8deg); font: 800 7cqw/1 var(--f-display); letter-spacing: .3cqw; color: #c3201b; border: .8cqw solid #c3201b; padding: 1cqw 2.4cqw .4cqw; border-radius: 1.4cqw; background: rgba(255,255,255,.55); }
 
-/* ---------- Del ---------- */
-.del { display: flex; gap: 14px; align-items: center; padding: 14px 16px; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; flex-wrap: wrap; }
-.del .av { width: 46px; height: 46px; font-size: 20px; }
-.del .txt { flex: 1 1 260px; min-width: 0; }
-.del p { margin: 2px 0 0; color: var(--ink-2); }
-.starter { margin-top: 12px; display: flex; gap: 14px; align-items: center; flex-wrap: wrap; padding: 14px 16px; border-radius: 14px; border: 1px solid color-mix(in srgb, var(--plate) 60%, transparent); background: color-mix(in srgb, var(--plate) 10%, var(--surface)); }
-.starter p { flex: 1 1 240px; margin: 0; }
-.starter b { font-weight: 600; }
-
-/* ---------- people cards ---------- */
-.deal { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 14px; display: grid; gap: 12px; }
-.deal.done { opacity: .62; }
+/* ---------- people & lot cards ---------- */
+.card-b { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 14px; display: grid; gap: 12px; min-width: 0; }
+.card-b.done { opacity: .62; }
 .who { display: flex; gap: 10px; align-items: center; min-width: 0; }
 .who > div { min-width: 0; }
 .who b { display: block; font-weight: 600; }
 .who small { display: block; color: var(--ink-2); font-size: 13px; line-height: 1.3; }
-.av { flex: none; width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; font: 800 17px/1 var(--f-display);
-  background: hsl(var(--h) 45% 32%); color: hsl(var(--h) 80% 90%); }
+.av { flex: none; width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; font: 800 17px/1 var(--f-display); background: hsl(var(--h) 45% 32%); color: hsl(var(--h) 80% 90%); }
 .meta { font-size: 12.5px; color: var(--ink-3); margin-top: -4px; }
 .want { margin: 0; color: var(--ink-2); }
 .want b { color: var(--ink); font-weight: 600; }
+.leave { font-size: 12.5px; color: var(--ink-3); white-space: nowrap; }
+
+.lot { box-shadow: inset 0 3px 0 var(--line); }
+.lot.win { box-shadow: inset 0 3px 0 var(--good); border-color: color-mix(in srgb, var(--good) 45%, var(--line)); }
+.lot.out { box-shadow: inset 0 3px 0 var(--warn); }
+.lot.mine { box-shadow: inset 0 3px 0 var(--plate); }
+.lot .clock { font: 700 30px/1 var(--f-plate); font-variant-numeric: tabular-nums; }
+.lot.urgent .clock { color: var(--bad); }
+.live { display: inline-flex; align-items: center; gap: 6px; font: 700 11px/1 var(--f-body); letter-spacing: .12em; text-transform: uppercase; color: var(--bad); }
+.live i { width: 8px; height: 8px; border-radius: 50%; background: var(--bad); animation: blink 1.2s ease-in-out infinite; }
+@keyframes blink { 50% { opacity: .25; } }
+.lead { margin: 0; font-weight: 600; font-size: 14px; }
+.bids { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; font-size: 12.5px; color: var(--ink-2); min-height: 3.6em; }
+.bids li { display: flex; justify-content: space-between; gap: 8px; }
+.bids li span:last-child { font-family: var(--f-plate); font-size: 14px; font-variant-numeric: tabular-nums; }
+.bids li.you { color: var(--good); }
 
 /* ---------- garage ---------- */
 .g-stats { display: flex; gap: 8px 22px; flex-wrap: wrap; margin-bottom: 12px; }
@@ -180,19 +197,35 @@ main { flex: 1; width: 100%; max-width: 1180px; margin: 0 auto; padding-block: 1
 .flags { display: flex; gap: 6px; flex-wrap: wrap; }
 .flags:empty { display: none; }
 
+/* ---------- cars ---------- */
+.cars { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 14px; align-items: start; }
+.car-card { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 14px; display: grid; gap: 10px; min-width: 0; }
+.car-card .stage-wrap { background: radial-gradient(90% 70% at 50% 100%, color-mix(in srgb, var(--g) 18%, transparent), transparent 70%); border-radius: 12px; padding: 6px 4px 0; }
+.car-h { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+.car-h b { display: block; font: 800 22px/1 var(--f-display); text-transform: uppercase; }
+.car-h small { display: block; color: var(--ink-2); font-size: 13px; margin-top: 3px; }
+.prest { display: inline-flex; gap: 2px; padding-top: 6px; flex: none; }
+.prest i { width: 8px; height: 4px; border-radius: 2px; background: var(--line); }
+.prest i.on { background: var(--plate); }
+.car-stage { position: relative; width: 100%; aspect-ratio: 400 / 130; perspective: 520px; isolation: isolate; }
+.car-stage svg.car { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.car-plate { position: absolute; width: 17%; transform: translate(-50%, -50%) rotateY(34deg); transform-style: preserve-3d; }
+.car-plate .pl { box-shadow: 0 .5cqw 0 #8b8e88, 0 3cqw 4cqw -1cqw rgba(0,0,0,.55); }
+.price { font: 600 24px/1 var(--f-plate); font-variant-numeric: tabular-nums; }
+.prog { height: 6px; border-radius: 3px; background: var(--line); overflow: hidden; }
+.prog i { display: block; height: 100%; width: 0; background: var(--good); border-radius: 3px; transition: width 1s linear; }
+
 /* ---------- packs ---------- */
 .packs { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 16px; align-items: start; }
 .pack-tile { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 16px; display: grid; gap: 12px; justify-items: center; text-align: center; }
 .pack-tile h3 { margin: 0; font: 800 24px/1 var(--f-display); text-transform: uppercase; }
 .pack-tile p { margin: 0; color: var(--ink-2); font-size: 13.5px; max-width: 34ch; }
-.pack-tile .price { font: 600 26px/1 var(--f-plate); font-variant-numeric: tabular-nums; }
 .odds { width: 100%; text-align: left; font-size: 12.5px; }
 .odds summary { cursor: pointer; color: var(--ink-2); font-weight: 600; list-style: none; text-align: center; }
 .odds summary::-webkit-details-marker { display: none; }
 .odds table { width: 100%; border-collapse: collapse; margin-top: 8px; font-variant-numeric: tabular-nums; }
 .odds td { padding: 3px 0; border-bottom: 1px solid var(--line); }
 .odds td:last-child { text-align: right; font-family: var(--f-plate); font-size: 14px; }
-
 .pack { --w: 170px; width: var(--w); aspect-ratio: 5 / 8; border-radius: 14px; position: relative; overflow: hidden; display: flex; flex-direction: column;
   background: var(--pk-bg); color: var(--pk-ink); box-shadow: 0 16px 34px rgba(0,0,0,.45), inset 0 0 0 1px rgba(255,255,255,.12); border: 0; padding: 0; font: inherit; }
 .pack .crimp { flex: 0 0 9%; background: repeating-linear-gradient(90deg, rgba(255,255,255,.2) 0 2px, rgba(0,0,0,.12) 2px 5px), var(--pk-crimp); }
@@ -214,9 +247,6 @@ main { flex: 1; width: 100%; max-width: 1180px; margin: 0 auto; padding-block: 1
 .studio { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 18px; align-items: start; }
 .panel { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 18px; display: grid; gap: 14px; min-width: 0; }
 .panel h3 { margin: 0; font: 800 22px/1 var(--f-display); text-transform: uppercase; }
-.seg { display: flex; flex-wrap: wrap; gap: 6px; }
-.seg button { min-height: 36px; padding: 0 12px; border-radius: 9px; border: 1px solid var(--line); background: var(--raised); font-weight: 600; font-size: 13.5px; }
-.seg button[aria-pressed="true"] { background: var(--plate); color: var(--plate-ink); border-color: transparent; }
 .field { display: grid; gap: 6px; }
 .field label { font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); }
 .field input { min-height: 48px; border-radius: 10px; border: 1px solid var(--line); background: var(--raised); padding: 0 14px; font: 600 26px/1 var(--f-plate); letter-spacing: .08em; text-transform: uppercase; width: 100%; }
@@ -229,7 +259,7 @@ main { flex: 1; width: 100%; max-width: 1180px; margin: 0 auto; padding-block: 1
 .ideas { display: flex; gap: 6px; flex-wrap: wrap; }
 .ideas button { border: 1px solid var(--line); background: var(--raised); border-radius: 8px; padding: 5px 9px; font: 600 15px/1 var(--f-plate); letter-spacing: .05em; }
 
-/* ---------- kit ---------- */
+/* ---------- upgrades, profile ---------- */
 .kit { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 14px; align-items: start; }
 .upg { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 14px; display: grid; gap: 10px; }
 .upg h3 { margin: 0; font: 800 21px/1 var(--f-display); text-transform: uppercase; }
@@ -237,12 +267,28 @@ main { flex: 1; width: 100%; max-width: 1180px; margin: 0 auto; padding-block: 1
 .lv { display: flex; gap: 4px; }
 .lv i { width: 22px; height: 6px; border-radius: 2px; background: var(--line); }
 .lv i.on { background: var(--plate); }
-.cols { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 18px; align-items: start; margin-top: 8px; }
-.ledger { list-style: none; margin: 0; padding: 0; max-height: 420px; overflow: auto; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
-.ledger li { display: grid; grid-template-columns: 52px 1fr auto; gap: 10px; padding: 8px 12px; border-bottom: 1px solid var(--line); font-size: 13.5px; }
+.rank { display: grid; grid-template-columns: auto 1fr; gap: 16px; align-items: center; padding: 18px; border-radius: 16px; background: var(--surface); border: 1px solid var(--line); }
+.rank .badge { width: 74px; height: 74px; border-radius: 16px; display: grid; place-items: center; background: var(--plate); color: var(--plate-ink); font: 900 34px/1 var(--f-display); box-shadow: inset 0 0 0 3px rgba(0,0,0,.6); }
+.rank h3 { margin: 0; font: 900 32px/1 var(--f-display); text-transform: uppercase; }
+.rank p { margin: 4px 0 8px; color: var(--ink-2); font-size: 13.5px; }
+.rank .bar { height: 8px; border-radius: 4px; background: var(--line); overflow: hidden; }
+.rank .bar i { display: block; height: 100%; background: var(--plate); }
+.sets { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; }
+.set { padding: 12px 14px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); display: grid; gap: 4px; }
+.set b { font-weight: 600; }
+.set small { color: var(--ink-2); font-size: 13px; }
+.set .rw { font: 600 14px/1 var(--f-plate); color: var(--ink-3); }
+.set.got { border-color: color-mix(in srgb, var(--good) 50%, var(--line)); }
+.set.got .rw { color: var(--good); }
+.cols { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 18px; align-items: start; }
+.ledger { list-style: none; margin: 0; padding: 0; max-height: 440px; overflow: auto; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
+.ledger li { display: grid; grid-template-columns: 1fr auto; gap: 10px; padding: 8px 12px; border-bottom: 1px solid var(--line); font-size: 13.5px; }
 .ledger li:last-child { border-bottom: 0; }
-.ledger .d { color: var(--ink-3); font-family: var(--f-plate); }
-.ledger .a { font-family: var(--f-plate); font-size: 15px; font-variant-numeric: tabular-nums; }
+.ledger small { color: var(--ink-3); }
+.ledger .a { font-family: var(--f-plate); font-size: 15px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.lines { list-style: none; margin: 0; padding: 0; display: grid; }
+.lines li { display: flex; justify-content: space-between; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--line); font-size: 14px; }
+.lines li span:last-child { font-family: var(--f-plate); font-size: 16px; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .howto { margin: 0; padding-left: 20px; display: grid; gap: 8px; color: var(--ink-2); max-width: 65ch; }
 .howto b { color: var(--ink); font-weight: 600; }
 
@@ -270,12 +316,11 @@ main { flex: 1; width: 100%; max-width: 1180px; margin: 0 auto; padding-block: 1
 .fine { margin: 0; font-size: 12.5px; color: var(--ink-3); }
 .picks { display: grid; gap: 8px; }
 .pick { display: grid; grid-template-columns: minmax(0, 150px) 1fr auto; gap: 12px; align-items: center; text-align: left; padding: 10px; border-radius: 12px; border: 1px solid var(--line); background: var(--raised); }
-.pick:hover { border-color: var(--ink-3); }
-.pick b { font: 600 18px/1 var(--f-plate); }
-.lines { list-style: none; margin: 0; padding: 0; display: grid; }
-.lines li { display: flex; justify-content: space-between; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--line); font-size: 14px; }
-.lines li span:last-child { font-family: var(--f-plate); font-size: 16px; font-variant-numeric: tabular-nums; white-space: nowrap; }
-.big-v { font: 600 44px/1 var(--f-plate); font-variant-numeric: tabular-nums; }
+.pick:hover:not(:disabled) { border-color: var(--ink-3); }
+.pick:disabled { opacity: .5; cursor: not-allowed; }
+.pick b { font: 600 18px/1.1 var(--f-plate); }
+.pick small { display: block; color: var(--ink-2); font-size: 12.5px; }
+.pick.carpick { grid-template-columns: minmax(0, 180px) 1fr auto; }
 .toggle-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
 
 /* ---------- pack stage ---------- */
@@ -310,13 +355,54 @@ main { flex: 1; width: 100%; max-width: 1180px; margin: 0 auto; padding-block: 1
 .card.myth .front { background: linear-gradient(180deg, #2a0f1f, #120a12); animation: holo 3s linear infinite; }
 @keyframes holo { 0% { border-color: #ff5280; } 33% { border-color: #ffae35; } 66% { border-color: #4f9cff; } 100% { border-color: #ff5280; } }
 .ov-bot { padding: 0 16px calc(20px + env(safe-area-inset-bottom, 0px)); display: grid; gap: 12px; justify-items: center; text-align: center; }
-.ov-bot .sum { font-size: 15px; color: var(--stage-ink-2); }
+.ov-bot .sum { font-size: 15px; color: var(--stage-ink-2); margin: 0; }
 .ov-bot .sum b { color: var(--stage-ink); font: 600 22px/1 var(--f-plate); }
-.ov .btn { background: #232a31; border-color: #3a434d; color: var(--stage-ink); }
-.ov .btn.pri { background: var(--plate); color: var(--plate-ink); border-color: transparent; }
+.ov .btn, .ride .btn { background: #232a31; border-color: #3a434d; color: var(--stage-ink); }
+.ov .btn.pri, .ride .btn.pri { background: var(--plate); color: var(--plate-ink); border-color: transparent; }
 .flash { position: fixed; inset: 0; z-index: 3; pointer-events: none; background: var(--tc); opacity: 0; }
 .flash.go { animation: flash .7s ease-out; }
 @keyframes flash { 0% { opacity: .55; } 100% { opacity: 0; } }
+
+/* ---------- cruise scene ---------- */
+.ride { position: fixed; inset: 0; z-index: 65; overflow: hidden; background: #05070d; color: var(--stage-ink); animation: fadein .5s ease; }
+@keyframes fadein { from { opacity: 0; } }
+.ride.night { --sky1: #04060c; --sky2: #1d2546; --road: #0b0d13; --lane: #d9cfae; --beam: .75; }
+.ride.day { --sky1: #86b4e4; --sky2: #f3e3cb; --road: #3e434e; --lane: #f3f0e6; --beam: 0; }
+.scene { position: absolute; inset: 0; overflow: hidden; }
+.scene .sky { position: absolute; inset: 0; background: linear-gradient(180deg, var(--sky1), var(--sky2) 78%); }
+.scene .orb { position: absolute; right: 13%; top: 11%; width: clamp(54px, 9vw, 96px); aspect-ratio: 1; border-radius: 50%; }
+.ride.night .orb { background: radial-gradient(circle at 38% 36%, #fbf8ef, #cfd6e6 70%); box-shadow: 0 0 60px 14px rgba(210, 222, 255, .18); }
+.ride.day .orb { background: radial-gradient(circle, #fff8e0, #ffd98a 70%); box-shadow: 0 0 90px 30px rgba(255, 214, 140, .45); }
+.scene .stars { position: absolute; inset: 0 0 45% 0; opacity: 0; background-image:
+  radial-gradient(1.2px 1.2px at 8% 18%, #fff, transparent), radial-gradient(1px 1px at 22% 42%, #fff, transparent),
+  radial-gradient(1.4px 1.4px at 36% 12%, #fff, transparent), radial-gradient(1px 1px at 52% 30%, #fff, transparent),
+  radial-gradient(1.2px 1.2px at 64% 8%, #fff, transparent), radial-gradient(1px 1px at 74% 36%, #fff, transparent),
+  radial-gradient(1.3px 1.3px at 90% 22%, #fff, transparent), radial-gradient(1px 1px at 46% 52%, #fff, transparent); }
+.ride.night .stars { opacity: .75; }
+.scene .sk { position: absolute; left: 0; bottom: 20%; background-repeat: repeat-x; background-size: auto 100%; background-position: 0 100%; will-change: transform; }
+.scene .sk.far { height: 50%; opacity: .95; }
+.scene .sk.mid { height: 38%; }
+.scene .sk.near { height: 22%; }
+.scene .road { position: absolute; left: 0; right: 0; bottom: 0; height: 20.5%; background: linear-gradient(180deg, #6b7079 0 3px, var(--road) 3px); }
+.scene .dash { position: absolute; left: 0; top: 44%; height: 4px; background: repeating-linear-gradient(90deg, var(--lane) 0 70px, transparent 70px 160px); opacity: .55; will-change: transform; }
+.ride-car { position: absolute; left: 50%; bottom: 8.5%; width: min(700px, 96vw); transform: translateX(-50%); animation: drivein 1.6s cubic-bezier(.16,.84,.3,1) both; }
+@keyframes drivein { from { transform: translateX(calc(-50% - 85vw)); } }
+.ride-car .car-stage { animation: bob 1s ease-in-out infinite; }
+@keyframes bob { 50% { transform: translateY(-1.5px); } }
+.ride-car .beam { position: absolute; right: -34%; bottom: 20%; width: 48%; height: 30%; pointer-events: none; opacity: var(--beam);
+  background: linear-gradient(90deg, rgba(255, 240, 205, .38), transparent); clip-path: polygon(0 42%, 100% 0, 100% 100%, 0 58%); }
+.ride-x { position: absolute; top: calc(16px + env(safe-area-inset-top, 0px)); right: 16px; z-index: 3; background: rgba(20, 24, 29, .6); border-color: var(--stage-line); color: var(--stage-ink); }
+.ride-card { position: absolute; left: 50%; top: max(calc(20px + env(safe-area-inset-top, 0px)), 6vh); z-index: 2; transform: translateX(-50%);
+  width: min(440px, calc(100vw - 32px)); padding: 20px; border-radius: 18px; background: rgba(16, 19, 24, .9); border: 1px solid var(--stage-line);
+  -webkit-backdrop-filter: blur(18px); backdrop-filter: blur(18px); box-shadow: 0 30px 70px -30px rgba(0,0,0,.7), 0 0 0 1px color-mix(in srgb, var(--g) 30%, transparent);
+  animation: cardin .6s cubic-bezier(.2,.8,.2,1) both; display: grid; gap: 10px; }
+@keyframes cardin { from { opacity: 0; transform: translate(-50%, 14px); } }
+.ride-card .rk { display: inline-flex; align-items: center; gap: 8px; font-size: 10.5px; letter-spacing: .16em; text-transform: uppercase; font-weight: 700; color: var(--g); }
+.ride-card .rk i { width: 7px; height: 7px; border-radius: 50%; background: var(--g); box-shadow: 0 0 10px var(--g); }
+.ride-card h3 { margin: 0; font: 800 26px/1.05 var(--f-display); text-transform: uppercase; text-wrap: balance; }
+.ride-card p { margin: 0; font-size: 14.5px; color: var(--stage-ink-2); }
+.ride-card .rr { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; padding-top: 12px; border-top: 1px solid var(--stage-line); font-size: 12.5px; color: var(--stage-ink-2); }
+.ride-card .rr b { font: 600 22px/1 var(--f-plate); color: var(--g); font-variant-numeric: tabular-nums; white-space: nowrap; }
 
 /* ---------- toast ---------- */
 .toast { position: fixed; left: 50%; bottom: calc(86px + env(safe-area-inset-bottom, 0px)); transform: translate(-50%, 20px); z-index: 80; background: var(--ink); color: var(--bg); padding: 10px 16px; border-radius: 10px; font-weight: 600; font-size: 14px; opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s; max-width: calc(100% - 32px); text-align: center; }
@@ -327,22 +413,28 @@ main { flex: 1; width: 100%; max-width: 1180px; margin: 0 auto; padding-block: 1
   .studio, .cols { grid-template-columns: minmax(0, 1fr); }
 }
 @media (max-width: 720px) {
-  .hud { padding-top: 8px; }
+  .hud { padding-top: 8px; position: relative; top: 0; }
   .hud-row { gap: 8px 16px; }
-  .brand { font-size: 22px; flex-basis: 100%; }
-  .brand + .stat { margin-left: 0; }
+  .brand { font-size: 22px; order: 1; flex: 1 1 calc(100% - 60px); }
+  .gear { order: 2; margin-left: auto; width: 36px; height: 36px; }
+  .hud-row > .stat { order: 3; }
   .stat .v { font-size: 19px; }
+  .lvl { min-width: 0; flex: 1 1 100%; order: 5; }
   .hud-sp { display: none; }
-  .hud-acts { margin-left: auto; }
-  .tabs { position: fixed; left: 0; right: 0; bottom: 0; z-index: 40; max-width: none; padding: 0 4px env(safe-area-inset-bottom, 0px); background: var(--surface); border-top: 1px solid var(--line); justify-content: space-around; gap: 0; }
-  .tabs button { flex: 1 1 0; flex-direction: column; gap: 3px; padding: 9px 2px 8px; font-size: 11.5px; border-bottom: 0; border-top: 3px solid transparent; min-width: 0; }
+  .trend { margin-top: 6px; font-size: 12.5px; }
+  .trend .news { display: none; }
+  .hud::after { margin-top: 8px; }
+  .tabs { position: fixed; left: 0; right: 0; bottom: 0; z-index: 40; max-width: none; padding: 0 2px env(safe-area-inset-bottom, 0px); background: var(--surface); border-top: 1px solid var(--line); justify-content: space-around; gap: 0; }
+  .tabs button { flex: 1 1 0; flex-direction: column; gap: 3px; padding: 9px 1px 8px; font-size: 11px; border-bottom: 0; border-top: 3px solid transparent; min-width: 0; }
   .tabs button[aria-selected="true"] { border-top-color: var(--plate); }
-  .tabs .badge { display: none; }
+  .tabs .dot { position: absolute; top: 4px; right: calc(50% - 22px); margin: 0; }
   .h { font-size: 26px; }
   .kv.three { grid-template-columns: 1fr 1fr; }
-  .pick { grid-template-columns: minmax(0, 120px) 1fr; }
-  .pick > :last-child { grid-column: 1 / -1; }
+  .pick, .pick.carpick { grid-template-columns: minmax(0, 130px) 1fr; }
+  .pick > :last-child { grid-column: 1 / -1; justify-self: start; }
   .sheet { padding: 16px; }
+  .cars { grid-template-columns: minmax(0, 1fr); }
+  .ride-card { top: calc(64px + env(safe-area-inset-top, 0px)); }
 }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
@@ -354,29 +446,27 @@ main { flex: 1; width: 100%; max-width: 1180px; margin: 0 auto; padding-block: 1
   <header class="hud">
     <div class="hud-row">
       <div class="brand"><b>Reg</b> Hustle</div>
-      <div class="stat"><small id="h-left">30 days left</small><span class="v" id="h-day">Day 1</span></div>
-      <div class="stat"><small>Cash</small><span class="v" id="h-cash">£0</span></div>
-      <div class="stat"><small id="h-debt-l">Owed to Del</small><span class="v debt" id="h-debt">£0</span></div>
+      <div class="stat"><small>Cash</small><span class="v" id="h-cash">£0</span><span class="tied" id="h-tied" hidden></span></div>
+      <div class="stat"><small>Net worth</small><span class="v" id="h-worth">£0</span></div>
+      <div class="lvl"><div class="between"><small class="stat" style="display:block"><small id="h-lvl">Rookie</small></small><small class="muted" id="h-rep" style="font-size:12px"></small></div><div class="bar"><i id="h-bar"></i></div></div>
       <div class="hud-sp"></div>
-      <div class="hud-acts">
-        <button type="button" class="btn" data-act="repay" id="btn-repay">Pay Del</button>
-        <button type="button" class="btn pri" data-act="endday" id="btn-end">End day</button>
-        <button type="button" class="icon-btn" data-act="settings" aria-label="Settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
-      </div>
+      <button type="button" class="icon-btn gear" data-act="settings" aria-label="Settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
     </div>
     <div class="trend" id="trend"></div>
   </header>
   <nav class="tabs" role="tablist" aria-label="Sections">
-    <button type="button" role="tab" data-act="tab" data-tab="street"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M5 21 9 3M19 21 15 3M12 5v2M12 11v2M12 17v2"/></svg>Street</button>
-    <button type="button" role="tab" data-act="tab" data-tab="packs"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M6 3h12l-1 3H7zM7 6h10v15H7z"/><path d="M10 11h4"/></svg>Packs</button>
-    <button type="button" role="tab" data-act="tab" data-tab="garage"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M3 10 12 4l9 6v10H3z"/><path d="M7 20v-6h10v6M7 17h10"/></svg>Garage <span class="badge" id="g-badge">0</span></button>
-    <button type="button" role="tab" data-act="tab" data-tab="studio"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><rect x="2.5" y="8" width="19" height="8" rx="1.5"/><path d="M7 11v2M10 11v2M14 11h3"/></svg>Studio</button>
-    <button type="button" role="tab" data-act="tab" data-tab="kit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-2.4-.6-.6-2.4z"/></svg>Kit</button>
+    <button type="button" role="tab" data-act="tab" data-tab="deals"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12l4-4 4 3 4-4 6 6"/><path d="M3 17h18"/></svg>Deals<span class="dot" id="dot-deals"></span></button>
+    <button type="button" role="tab" data-act="tab" data-tab="auctions"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4l6 6M11 7l6 6M9.5 8.5l6 6M4 20l7-7"/><path d="M13 21h8"/></svg>Auctions<span class="dot" id="dot-auctions"></span></button>
+    <button type="button" role="tab" data-act="tab" data-tab="garage"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M3 10 12 4l9 6v10H3z"/><path d="M7 20v-6h10v6M7 17h10"/></svg>Garage</button>
+    <button type="button" role="tab" data-act="tab" data-tab="jobs"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 15l2-5h14l2 5v3H3z"/><circle cx="7.5" cy="18" r="1.6"/><circle cx="16.5" cy="18" r="1.6"/><path d="M7 10l1.5-4h7L17 10"/></svg>Hire<span class="dot" id="dot-jobs"></span></button>
+    <button type="button" role="tab" data-act="tab" data-tab="shop"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M6 3h12l-1 3H7zM7 6h10v15H7z"/><path d="M10 11h4"/></svg>Shop</button>
+    <button type="button" role="tab" data-act="tab" data-tab="profile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>Profile</button>
   </nav>
   <main id="main"></main>
 </div>
 <div class="modal" id="modal" hidden><div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-h"></div></div>
 <div class="ov" id="ov" hidden></div>
+<div class="ride" id="ride" hidden></div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script>
@@ -634,30 +724,24 @@ function rollPlate(pool, tier, ex) {
 }
 
 /* ================================================================
-   Market, packs, people
+   Game constants
    ================================================================ */
-const DEADLINE = 30, START_CASH = 400, START_DEBT = 2000, RATE = .025, RENT = 15, CHECK_FEE = 35, AUCTION_FEE = .12, DEALER = .5;
+const CHECK_FEE = 35, DEALER = .5, LIVE_FEE = .1, RIDE_CD = 40000, TREND_MS = 6 * 60000, START_CASH = 1500;
 const TREND_CATS = [
   { k: 'names', l: 'Name plates', news: 'A reality-TV star paid silly money for a name plate.' },
-  { k: 'words', l: 'Word plates', news: 'Word plates are all over social media this week.' },
-  { k: 'dateless', l: 'Dateless', news: 'A dateless reg set a record at the classic-car auction.' },
+  { k: 'words', l: 'Word plates', news: 'Word plates are all over social media right now.' },
+  { k: 'dateless', l: 'Dateless', news: 'A dateless reg just set a record at a classic-car sale.' },
   { k: 'classic', l: 'Prefix & suffix', news: 'Retro hatchbacks are back. Older-format plates are in demand.' },
   { k: 'current', l: 'Current-style', news: 'New-car sales are up and buyers want fresh current plates.' },
   { k: 'low', l: 'Low numbers', news: 'Low numbers are flying at the trade sales.' },
   { k: 'pattern', l: 'Patterns', news: 'Collectors are chasing triples, runs and doubles.' },
 ];
-const trendMult = a => {
-  if (!S || !S.trend || !a) return 1;
-  let m = 1;
-  if (a.cats.has(S.trend.hot)) m *= S.trend.hm;
-  if (a.cats.has(S.trend.cold)) m *= S.trend.cm;
-  return m;
-};
-const mv = t => { const a = appraise(t); return a ? Math.round(a.v * trendMult(a)) : 0; };
+const LEVELS = [[0, 'Rookie'], [150, 'Spotter'], [500, 'Trader'], [1500, 'Dealer'], [4000, 'Collector'], [10000, 'Connoisseur'], [25000, 'Plate Baron'], [60000, 'Tycoon'], [150000, 'Legend']];
+const levelOf = r => { let i = 0; LEVELS.forEach((l, k) => { if (r >= l[0]) i = k; }); return i; };
 
 const PACKS = [
   { id: 'starter', name: 'Starter Pack', art: 'street', pool: 'normal', starter: true, price: 0,
-    blurb: 'On the house from Del. Three everyday plates, one of them a bit better.',
+    blurb: 'On the house to get you going. Three everyday plates, one of them a bit better.',
     slots: [[80, 20, 0, 0, 0, 0], [80, 20, 0, 0, 0, 0], [0, 82, 18, 0, 0, 0]] },
   { id: 'street', name: 'Street Pack', art: 'street', pool: 'normal', price: 790,
     blurb: 'Three normal plates off the street. Mostly common, the odd gem.',
@@ -689,12 +773,14 @@ const PERSONAS = {
     { n: 'Tracey', r: 'Divorce sale', l: 'It was his. I just want it out of the house.' },
     { n: 'Callum', r: 'Inherited it from Grandad', l: 'No idea what these go for. Make me an offer.' },
     { n: 'Priya', r: 'Moving abroad next week', l: 'My flight’s on Monday. Quick sale, please.' },
+    { n: 'Doreen', r: 'Downsizing', l: 'The bungalow has no drive, so the plate can go.' },
   ],
   average: [
     { n: 'Gaz', r: 'Bloke down the pub', l: 'Mate of a mate said you buy plates.' },
     { n: 'Sandra', r: 'Car-boot regular', l: 'I know roughly what it’s worth, so don’t try it on.' },
     { n: 'Kev', r: 'Van driver', l: 'Swapped the van, kept the plate. Fair price and it’s yours.' },
     { n: 'Neil', r: 'Office manager', l: 'Had it on retention for years. Time to let it go.' },
+    { n: 'Aisha', r: 'Selling her first car', l: 'Dad bought me this plate. I’d rather have the money.' },
   ],
   shark: [
     { n: 'Vince', r: 'Plate dealer', l: 'Top-drawer reg, this. The price is the price, more or less.' },
@@ -707,10 +793,11 @@ const PERSONAS = {
     { n: 'Mick', r: 'Car park, engine running', l: 'Bargain, this. Quick, before I change my mind.' },
   ],
 };
-const BUYER_PEOPLE = [
+const CLIENT_PEOPLE = [
   { n: 'Darren', r: 'Proud dad' }, { n: 'Jade', r: 'Footballer’s agent' }, { n: 'Arthur', r: 'Wedding-car firm' },
   { n: 'Monica', r: 'Collector' }, { n: 'Ellie', r: 'Influencer' }, { n: 'Frank', r: 'Retired cabbie' },
   { n: 'Sunita', r: 'Garage owner' }, { n: 'Theo', r: 'New money' }, { n: 'Bernie', r: 'Classic-car restorer' },
+  { n: 'Lola', r: 'Pop star’s manager' }, { n: 'Hamish', r: 'Estate owner' }, { n: 'Kofi', r: 'Car dealer' },
 ];
 const WANTS = [
   { k: 'cat', cat: 'names', l: 'a name plate', w: 3 },
@@ -725,58 +812,172 @@ const WANTS = [
   { k: 'tier', min: 3, l: 'anything Epic or better', w: 1 },
   { k: 'any', l: 'any plate, as long as it’s cheap', w: 3 },
 ];
-const UPGRADES = [
-  { k: 'eye', name: 'Trained Eye', cost: [350, 1500, 6000], desc: 'Your guesses at a plate’s value get tighter.', lvl: l => `Guess range ±${Math.round(EYE_ERR[l] * 100)}%` },
-  { k: 'contacts', name: 'Contacts', cost: [600, 3000], desc: 'One more seller turns up on the street each day.', lvl: l => `${4 + l} sellers a day` },
-  { k: 'tongue', name: 'Silver Tongue', cost: [1200], desc: 'People haggle one round longer, sellers go 5% lower and buyers pay 5% more.', lvl: l => l ? 'Learned' : 'Not learned' },
-  { k: 'hpi', name: 'Plate Check Kit', cost: [500], desc: `Free history checks on any plate. Without it, each check costs ${'£' + CHECK_FEE}.`, lvl: l => l ? 'Owned' : 'Not owned' },
-];
 const EYE_ERR = [.45, .3, .18, .08];
+const UPGRADES = [
+  { k: 'eye', name: 'Trained Eye', cost: [400, 1800, 7000], desc: 'Your guesses at a street seller’s plate get tighter.', lvl: l => `Guess range ±${Math.round(EYE_ERR[l] * 100)}%` },
+  { k: 'contacts', name: 'Contacts', cost: [800, 4000, 15000], desc: 'More sellers hang around the street at once.', lvl: l => `Up to ${4 + l} sellers` },
+  { k: 'tongue', name: 'Silver Tongue', cost: [1500], desc: 'People haggle one round longer, sellers go 5% lower and clients pay 5% more.', lvl: l => l ? 'Learned' : 'Not learned' },
+  { k: 'hpi', name: 'Plate Check Kit', cost: [600], desc: `Free history checks. Without it, each check costs £${CHECK_FEE}.`, lvl: l => l ? 'Owned' : 'Not owned' },
+  { k: 'space', name: 'Bigger Lock-up', cost: [12000, 80000, 350000], desc: 'Room for more cars.', lvl: l => `${CAR_SLOTS[l]} car spaces` },
+];
+const CAR_SLOTS = [3, 5, 8, 14];
+
+/* ---------- cars ---------- */
+const BODIES = {
+  hatch:   { top: [[44,96],[42,72],[50,46],[70,30],[200,28],[238,34],[270,56],[330,62],[352,72],[354,94]], glass: [[57,56],[73,36],[198,34],[230,38],[260,56]], pillars: [140], wheels: [100, 298], r: 19, tl: 62, hl: 66 },
+  sedan:   { top: [[18,96],[16,74],[28,62],[82,58],[128,33],[222,30],[282,58],[342,64],[376,72],[380,94]], glass: [[92,57],[132,37],[220,34],[272,57]], pillars: [178], wheels: [86, 314], r: 20, tl: 66, hl: 68 },
+  suv:     { top: [[22,98],[20,58],[26,38],[42,20],[252,18],[300,50],[356,58],[376,66],[380,96]], glass: [[33,50],[46,27],[248,25],[290,50]], pillars: [130, 200], wheels: [92, 312], r: 23, tl: 56, hl: 62, rails: [48, 15, 238, 13] },
+  sport:   { top: [[20,96],[18,76],[36,64],[96,60],[150,40],[212,38],[292,66],[350,72],[380,80],[382,94]], glass: [[106,60],[152,44],[208,42],[278,64]], pillars: [], wheels: [88, 316], r: 20, tl: 68, hl: 75 },
+  super:   { top: [[22,96],[20,74],[40,68],[110,64],[160,46],[210,44],[270,68],[344,80],[382,86],[384,94]], glass: [[120,64],[162,50],[206,48],[256,68]], pillars: [], wheels: [92, 318], r: 21, tl: 72, hl: 82 },
+  hyper:   { top: [[20,96],[20,76],[54,70],[120,66],[168,48],[212,47],[268,70],[340,82],[384,88],[386,95]], glass: [[130,66],[170,52],[208,51],[254,70]], pillars: [], wheels: [90, 320], r: 21, tl: 74, hl: 84, wing: true },
+  limo:    { top: [[10,96],[8,74],[22,62],[72,58],[118,32],[282,30],[332,58],[370,64],[390,72],[392,94]], glass: [[80,57],[122,36],[280,34],[322,57]], pillars: [168, 232], wheels: [74, 330], r: 20, tl: 66, hl: 68 },
+  stretch: { top: [[6,96],[6,72],[18,62],[60,58],[96,30],[304,28],[344,58],[376,64],[392,72],[394,94]], glass: [[66,57],[100,34],[300,32],[334,57]], pillars: [150, 200, 250], wheels: [64, 336], r: 20, tl: 66, hl: 68 },
+};
+const BODY_NAME = { hatch: 'hatchback', sedan: 'saloon', suv: 'SUV', sport: 'sports car', super: 'supercar', hyper: 'hypercar', limo: 'limousine', stretch: 'stretch limo' };
+const CARS = [
+  { id: 'nan', name: 'Nan’s Old Hatch', body: 'hatch', price: 0, prest: 1, paint: '#9b6a4a', cls: 'Tired 1998 hatchback' },
+  { id: 'kestrel', name: 'Kestrel 1.0', body: 'hatch', price: 9000, prest: 2, paint: '#6f93ad', cls: 'City hatchback' },
+  { id: 'corsair', name: 'Corsair 2.0', body: 'sedan', price: 24000, prest: 3, paint: '#9aa1aa', cls: 'Family saloon' },
+  { id: 'atlas', name: 'Atlas 4×4', body: 'suv', price: 48000, prest: 4, paint: '#56704f', cls: 'Off-roader' },
+  { id: 'regent', name: 'Regent Executive', body: 'sedan', price: 85000, prest: 5, paint: '#24324a', cls: 'Executive saloon' },
+  { id: 'volt', name: 'Volt GT', body: 'sport', price: 120000, prest: 5, paint: '#2f7fe0', cls: 'Electric GT' },
+  { id: 'strada', name: 'Strada 800', body: 'sport', price: 190000, prest: 6, paint: '#b3221d', cls: 'Sports car' },
+  { id: 'baron', name: 'Baron Grand', body: 'suv', price: 240000, prest: 6, paint: '#1a1c22', cls: 'Luxury SUV' },
+  { id: 'mayfair', name: 'Mayfair L', body: 'limo', price: 380000, prest: 7, paint: '#2e2c38', cls: 'Limousine' },
+  { id: 'vento', name: 'Vento S', body: 'super', price: 520000, prest: 7, paint: '#e7a21a', cls: 'Supercar' },
+  { id: 'falcon', name: 'Falcon R', body: 'super', price: 900000, prest: 8, paint: '#e4e7eb', cls: 'Track-bred supercar' },
+  { id: 'sovereign', name: 'Sovereign Stretch', body: 'stretch', price: 1400000, prest: 8, paint: '#101217', cls: 'Stretch limousine' },
+  { id: 'zenith', name: 'Zenith Hyper', body: 'hyper', price: 2600000, prest: 9, paint: '#4a2a72', cls: 'Hypercar' },
+  { id: 'celeste', name: 'Celeste One', body: 'hyper', price: 6500000, prest: 10, paint: '#efe4cc', cls: 'One-off electric hypercar' },
+];
+const carModel = id => CARS.find(c => c.id === id);
+
+/* ---------- hire events ---------- */
+const EVENTS = [
+  { k: 'date', n: 'First date', w: 3, who: ['Ryan, 19', 'Chloe, 22', 'Marcus, 25'], desc: 'Wants to turn up looking like they’ve made it.', bodies: Object.keys(BODIES), minP: 1, pay: [60, 180], dur: [25, 45], rep: 3 },
+  { k: 'ball', n: 'Student ball', w: 3, who: ['Uni rowing club', 'Medical school society'], desc: 'Four students, one car, a lot of photos.', bodies: ['hatch', 'sedan', 'suv', 'sport', 'limo'], minP: 1, pay: [90, 260], dur: [30, 55], rep: 4 },
+  { k: 'school', n: 'School run', w: 2, who: ['A hedge-fund family', 'A TV presenter'], desc: 'Two kids, one very nice car, back by nine.', bodies: ['suv', 'sedan', 'limo'], minP: 3, pay: [140, 320], dur: [30, 50], rep: 4 },
+  { k: 'airport', n: 'Airport run', w: 3, who: ['A tech CEO', 'A visiting diplomat', 'A film producer'], desc: 'Heathrow pick-up. Needs something smart.', bodies: ['sedan', 'limo', 'suv', 'stretch'], minP: 4, pay: [220, 520], dur: [40, 70], rep: 6, bonus: { tier: 2, l: 'a Rare or better plate' } },
+  { k: 'birthday', n: '18th birthday', w: 3, who: ['The Patel twins', 'Kayden', 'Sophie’s mum'], desc: 'A surprise arrival at the party.', bodies: ['sport', 'super', 'hyper', 'suv'], minP: 4, pay: [300, 900], dur: [45, 90], rep: 7, bonus: { cat: 'names', l: 'a name plate' } },
+  { k: 'prom', n: 'Prom night', w: 4, who: ['Year 11 at St Mary’s', 'Year 13 at Oakfield', 'A group of six'], desc: 'They want to arrive in style and leave a legend.', bodies: ['limo', 'stretch', 'suv', 'super'], minP: 5, pay: [450, 1200], dur: [60, 110], rep: 9, bonus: { cat: 'words', l: 'a word plate' } },
+  { k: 'wedding', n: 'Wedding', w: 3, who: ['Emma and Josh', 'Priya and Sam', 'Grace and Tom'], desc: 'Church to reception, ribbons on the bonnet.', bodies: ['limo', 'stretch', 'sedan'], minP: 5, pay: [900, 2600], dur: [90, 150], rep: 12, bonus: { cat: 'names', l: 'a name plate' } },
+  { k: 'video', n: 'Music video shoot', w: 2, who: ['A grime artist', 'An up-and-coming pop act'], desc: 'Slow-motion drive-bys all afternoon.', bodies: ['super', 'hyper', 'sport'], minP: 6, pay: [3000, 11000], dur: [80, 140], rep: 20, bonus: { cat: 'words', l: 'a word plate' } },
+  { k: 'unveil', n: 'Footballer’s unveiling', w: 2, who: ['A Premier League club', 'A new signing’s agent'], desc: 'Drop the new signing at the stadium in front of the cameras.', bodies: ['super', 'hyper', 'suv'], minP: 7, pay: [6000, 20000], dur: [80, 140], rep: 28, bonus: { cat: 'low', l: 'a low-number plate' } },
+  { k: 'premiere', n: 'Film premiere', w: 1, who: ['A Hollywood studio', 'A streaming giant'], desc: 'Red carpet in Leicester Square.', bodies: ['stretch', 'limo', 'hyper'], minP: 8, pay: [9000, 30000], dur: [100, 160], rep: 40, bonus: { tier: 4, l: 'a Legendary or better plate' } },
+];
+
+/* ---------- collection sets ---------- */
+const countCat = c => S.owned.filter(o => !o.dud && appraise(o.t).cats.has(c)).length;
+const SETS = [
+  { id: 'first', n: 'First plate', d: 'Own any plate.', rep: 10, test: () => S.owned.some(o => !o.dud) },
+  { id: 'names5', n: 'Name dropper', d: 'Own 5 name plates at once.', rep: 150, test: () => countCat('names') >= 5 },
+  { id: 'words5', n: 'Wordsmith', d: 'Own 5 word plates at once.', rep: 150, test: () => countCat('words') >= 5 },
+  { id: 'ones', n: 'Number ones', d: 'Own 3 plates with the number 1.', rep: 250, test: () => S.owned.filter(o => !o.dud && appraise(o.t).tags.some(g => g.l === 'Number 1')).length >= 3 },
+  { id: 'dateless3', n: 'Dateless club', d: 'Own 3 dateless plates at once.', rep: 300, test: () => countCat('dateless') >= 3 },
+  { id: 'spectrum', n: 'Full spectrum', d: 'Own a Common, Uncommon, Rare, Epic and Legendary plate at once.', rep: 800, test: () => [0, 1, 2, 3, 4].every(i => S.owned.some(o => !o.dud && appraise(o.t).tier === i)) },
+  { id: 'mythic', n: 'Mythic', d: 'Own a Mythic plate.', rep: 2000, test: () => S.owned.some(o => !o.dud && appraise(o.t).tier === 5) },
+  { id: 'fleet', n: 'Fleet', d: 'Own 5 cars.', rep: 500, test: () => S.cars.length >= 5 },
+  { id: 'chauffeur', n: 'Chauffeur', d: 'Finish 10 hire jobs.', rep: 300, test: () => S.stats.jobs >= 10 },
+  { id: 'hammer', n: 'Hammer time', d: 'Win 10 live auctions.', rep: 400, test: () => S.stats.wins >= 10 },
+  { id: 'match', n: 'Perfect match', d: 'Put a name or word plate on a car worth £500k or more.', rep: 600, test: () => S.cars.some(c => { const o = plateOn(c); const a = o && appraise(o.t); return a && carModel(c.m).price >= 500000 && (a.cats.has('names') || a.cats.has('words')); }) },
+  { id: 'million', n: 'Millionaire', d: 'Reach a net worth of £1m.', rep: 1500, test: () => netWorth() >= 1e6 },
+];
 
 /* ================================================================
    State and storage
    ================================================================ */
-const SAVE_KEY = 'reghustle.save.v1', PREF_KEY = 'reghustle.prefs.v1';
+const SAVE_KEY = 'reghustle.save.v2', OLD_KEY = 'reghustle.save.v1', PREF_KEY = 'reghustle.prefs.v1';
 let S = null;
-const UI = { tab: 'street', modal: null, gFilter: 'all', gTier: 'all', gSort: 'value', studioFmt: 'cur', studioText: '', ideas: [] };
+const UI = { tab: 'deals', gsub: 'plates', ssub: 'packs', modal: null, gFilter: 'all', gTier: 'all', gSort: 'value', studioFmt: 'cur', studioText: '', ideas: [], confirmNew: false, dirty: new Set(), rideWaiting: false };
 let P = { sound: true, plate: 'yellow', theme: 'auto' };
+const NOW = () => Date.now();
 
 function load(k) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : null; } catch (e) { return null; } }
 function store(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { /* storage unavailable */ } }
 const save = () => store(SAVE_KEY, S);
 const savePrefs = () => store(PREF_KEY, P);
 
-function newGame() {
-  S = {
-    v: 1, day: 1, cash: START_CASH, debt: START_DEBT, owned: [], sellers: [], buyers: [], trend: null,
-    upg: { eye: 0, contacts: 0, tongue: 0, hpi: 0 }, starter: true, cleared: 0, over: false, nid: 1,
-    ledger: [], stats: { packs: 0, best: null, bought: 0, sold: 0, profit: 0, peak: 0 },
+function blankState() {
+  const t = NOW();
+  return {
+    v: 2, cash: START_CASH, rep: 0, owned: [], cars: [], sellers: [], clients: [], lots: [], jobs: [], jobLog: [], trend: null,
+    spawn: { seller: t, client: t + 20000, lot: t, job: t + 15000 }, rideReady: 0,
+    upg: { eye: 0, contacts: 0, tongue: 0, hpi: 0, space: 0 }, sets: {}, starter: true, intro: true, nid: 1,
+    ledger: [], stats: { packs: 0, best: null, bought: 0, sold: 0, profit: 0, wins: 0, jobs: 0, rides: 0, earnedJobs: 0 },
   };
-  log('Borrowed from Del', 0, `You owe ${gbp(START_DEBT)} at 2.5% a day`);
-  newTrend(); newStreet();
 }
-function valid(s) { return s && s.v === 1 && Array.isArray(s.owned) && Array.isArray(s.sellers) && Array.isArray(s.buyers) && s.upg && s.stats && typeof s.cash === 'number'; }
+function newGame() {
+  S = blankState();
+  S.cars.push({ id: nid(), m: 'nan', plate: null, busyUntil: 0, job: null });
+  log('Started the business', 0, 'Nan lent you her old hatchback');
+  newTrend(); fillWorld();
+}
+/* Bring a save from the 30-day version across: keep cash, plates, upgrades and stats. */
+function migrateV1(o) {
+  newGame();
+  S.cash = Math.max(START_CASH, Math.round(o.cash || 0));
+  S.owned = (o.owned || []).filter(x => x && appraise(x.t)).map(x => ({ id: nid(), t: appraise(x.t).t, paid: x.paid || 0, dud: !!x.dud, lock: !!x.lock, src: x.src || 'Old stock', lot: null }));
+  Object.keys(S.upg).forEach(k => { if (o.upg && o.upg[k] != null) S.upg[k] = Math.min(o.upg[k], (UPGRADES.find(u => u.k === k) || { cost: [] }).cost.length); });
+  if (o.stats) ['packs', 'bought', 'sold', 'profit'].forEach(k => { S.stats[k] = o.stats[k] || 0; });
+  if (o.stats && o.stats.best) S.stats.best = o.stats.best;
+  S.starter = !!o.starter;
+  log('Moved your old garage across', 0, `${S.owned.length} plates`);
+}
+function validV2(s) { return s && s.v === 2 && Array.isArray(s.owned) && Array.isArray(s.cars) && Array.isArray(s.lots) && s.upg && s.stats && s.spawn && typeof s.cash === 'number'; }
 const nid = () => S.nid++;
-function log(t, a, note) { S.ledger.unshift({ d: S.day, t, a: Math.round(a || 0), note: note || '' }); S.ledger.length = Math.min(S.ledger.length, 80); }
+function log(t, a, note) { S.ledger.unshift({ ts: NOW(), t, a: Math.round(a || 0), note: note || '' }); if (S.ledger.length > 100) S.ledger.length = 100; }
+const level = () => levelOf(S.rep);
+function addRep(n) {
+  n = Math.round(n); if (!n) return;
+  const before = level(); S.rep = Math.max(0, S.rep + n); const after = level();
+  if (after > before) { toast(`Level up. You’re now a ${LEVELS[after][1]}.`); SFX.flip(Math.min(5, after)); burstConfetti(); log(`Reached ${LEVELS[after][1]}`, 0, 'Better lots, clients and jobs'); }
+}
 
+/* ---------- money helpers ---------- */
+const plateById = id => S.owned.find(o => o.id === id);
+const plateOn = car => car.plate ? plateById(car.plate) : null;
+const carOf = o => S.cars.find(c => c.plate === o.id);
+const busy = car => car.busyUntil > NOW();
+const tied = () => S.lots.filter(l => !l.done && !l.mine && l.lead === 'you').reduce((s, l) => s + l.cur, 0);
+const avail = () => S.cash - tied();
+const carResale = m => Math.max(150, Math.round(m.price * .7));
+const collectionValue = () => S.owned.reduce((s, o) => s + (o.dud ? 0 : mv(o.t)), 0);
+const netWorth = () => S.cash + collectionValue() + S.cars.reduce((s, c) => s + carResale(carModel(c.m)), 0);
+const ownedSet = () => new Set([...S.owned.map(o => o.t), ...S.sellers.map(s => s.t), ...S.lots.map(l => l.t)]);
+const plateLocked = o => !!o.lot || (carOf(o) && busy(carOf(o)));
+
+/* ================================================================
+   The living world: sellers, clients, auctions, hire jobs, market
+   ================================================================ */
+const trendMult = a => {
+  if (!S || !S.trend || !a) return 1;
+  let m = 1;
+  if (a.cats.has(S.trend.hot)) m *= S.trend.hm;
+  if (a.cats.has(S.trend.cold)) m *= S.trend.cm;
+  return m;
+};
+const mv = t => { const a = appraise(t); return a ? Math.round(a.v * trendMult(a)) : 0; };
 function newTrend() {
   const h = pick(TREND_CATS); let c; do { c = pick(TREND_CATS); } while (c.k === h.k);
-  S.trend = { hot: h.k, hm: +rand(1.15, 1.5).toFixed(2), cold: c.k, cm: +rand(.7, .9).toFixed(2) };
+  S.trend = { hot: h.k, hm: +rand(1.15, 1.5).toFixed(2), cold: c.k, cm: +rand(.7, .9).toFixed(2), until: NOW() + TREND_MS, seed: ri(1, 1e9) };
 }
-const ownedSet = () => new Set(S.owned.map(o => o.t));
+const skew = (ws, f) => ws.map((w, i) => w * f ** i);
+const sellerCap = () => 4 + S.upg.contacts;
+const clientCap = () => Math.min(6, 2 + Math.floor(level() / 2));
+const lotCap = () => Math.min(7, 3 + Math.floor(level() / 3));
+const jobCap = () => Math.min(6, 2 + Math.floor(level() / 3));
 
-function newSeller(ex, usedNames) {
+function newSeller(opt = {}) {
+  const ex = ownedSet(), used = new Set(S.sellers.map(s => s.n));
   const types = Object.keys(SELLER_TYPES);
-  const type = wpick(types, types.map(k => SELLER_TYPES[k].w)), T = SELLER_TYPES[type];
-  const tier = wpick([0, 1, 2, 3, 4, 5], T.tiers);
+  const type = opt.type || wpick(types, types.map(k => SELLER_TYPES[k].w)), T = SELLER_TYPES[type];
+  let tier = wpick([0, 1, 2, 3, 4, 5], skew(T.tiers, 1 + .08 * level()));
+  if (opt.boost) tier = Math.min(5, tier + 1);
   const t = rollPlate('street', tier, ex);
-  ex.add(t);
-  let per = PERSONAS[type].filter(x => !usedNames.has(x.n));
-  if (!per.length) per = PERSONAS[type];
-  const who = pick(per); usedNames.add(who.n);
-  const a = appraise(t), m = mv(t), tg = S.upg.tongue ? .95 : 1;
-  let ask, reserve;
+  let per = PERSONAS[type].filter(x => !used.has(x.n)); if (!per.length) per = PERSONAS[type];
+  const who = pick(per), a = appraise(t), m = mv(t), tg = S.upg.tongue ? .95 : 1;
   const dodgy = Math.random() < T.dodgy;
+  let ask, reserve;
   if (type === 'clueless') { ask = a.v * rand(.35, .9); reserve = ask * rand(.55, .8); }
   else if (type === 'average') { ask = m * rand(.9, 1.3); reserve = m * rand(.75, 1); }
   else if (type === 'shark') { ask = m * rand(1.2, 1.8); reserve = m * rand(1, 1.25); }
@@ -784,34 +985,203 @@ function newSeller(ex, usedNames) {
   ask = roundNice(ask); reserve = Math.min(ask, roundNice(reserve * tg));
   const err = EYE_ERR[S.upg.eye], c = m * (1 + clamp(gauss() * err * .35, -err * .8, err * .8));
   const pat = (type === 'clueless' ? ri(3, 4) : ri(2, 3)) + (S.upg.tongue ? 1 : 0);
-  return { id: nid(), type, n: who.n, r: who.r, l: who.l, hue: ri(0, 359), t, ask, reserve, counter: ask, pat, maxPat: pat,
-    dodgy, check: null, est: [roundNice(c * (1 - err)), roundNice(c * (1 + err))], state: 'open', msg: who.l, mood: '', paid: 0 };
+  return { id: nid(), type, n: who.n, r: who.r, hue: ri(0, 359), t, ask, reserve, counter: ask, pat, maxPat: pat, dodgy, check: null,
+    est: [roundNice(c * (1 - err)), roundNice(c * (1 + err))], state: 'open', msg: who.l, mood: '', paid: 0, until: NOW() + ri(180, 360) * 1000 };
 }
-function newBuyer(usedNames) {
-  let ppl = BUYER_PEOPLE.filter(x => !usedNames.has(x.n)); if (!ppl.length) ppl = BUYER_PEOPLE;
-  const who = pick(ppl); usedNames.add(who.n);
-  const want = wpick(WANTS, WANTS.map(w => w.w));
-  let budget = wpick([500, 1500, 4000, 12000, 40000, 150000, 600000], [24, 26, 20, 14, 9, 5, 2]);
+function newClient() {
+  const used = new Set(S.clients.map(c => c.n));
+  let ppl = CLIENT_PEOPLE.filter(x => !used.has(x.n)); if (!ppl.length) ppl = CLIENT_PEOPLE;
+  const who = pick(ppl), want = wpick(WANTS, WANTS.map(w => w.w));
+  let budget = wpick([500, 1500, 4000, 12000, 40000, 150000, 600000], skew([24, 26, 20, 14, 9, 5, 2], 1 + .1 * level()));
   if (want.k === 'tier') budget = Math.max(budget, TIERS[want.min].min * 3);
   if (want.cat === 'dateless') budget = Math.max(budget, 4000);
   const pm = want.k === 'any' ? rand(.55, .85) : rand(.95, 1.45);
   const pat = ri(2, 3) + (S.upg.tongue ? 1 : 0);
-  return { id: nid(), n: who.n, r: who.r, hue: ri(0, 359), want, budget, pm: +pm.toFixed(2), pat, state: 'open', deal: null, sold: null };
+  return { id: nid(), n: who.n, r: who.r, hue: ri(0, 359), want, budget, pm: +pm.toFixed(2), pat, state: 'open', deal: null, sold: null, until: NOW() + ri(240, 480) * 1000 };
 }
-function newStreet() {
-  const ex = ownedSet(), used = new Set();
-  S.sellers = Array.from({ length: 4 + S.upg.contacts }, () => newSeller(ex, used));
-  S.buyers = Array.from({ length: 3 }, () => newBuyer(used));
+const bidInc = v => v < 100 ? 5 : v < 500 ? 10 : v < 1000 ? 25 : v < 5000 ? 50 : v < 10000 ? 100 : v < 50000 ? 500 : v < 100000 ? 1000 : 5000;
+function makeBidders(m, k) {
+  const used = new Set();
+  return Array.from({ length: k }, () => {
+    let n; do { n = `${pick(['Paddle', 'Phone bidder', 'Online bidder', 'Room bidder'])} ${ri(2, 99)}`; } while (used.has(n));
+    used.add(n);
+    return { n, max: Math.round(m * Math.exp(gauss() * .2 - .06)) };
+  });
+}
+function newLot() {
+  const tier = wpick([0, 1, 2, 3, 4, 5], skew([26, 34, 24, 12, 3.5, .5], 1 + .12 * level()));
+  const t = rollPlate('street', tier, ownedSet()), m = mv(t);
+  const c = m * (1 + clamp(gauss() * .08, -.15, .15));
+  return { id: nid(), t, est: [roundNice(c * .8), roundNice(c * 1.2)], start: roundNice(m * rand(.25, .5)), cur: 0, hasBid: false, lead: null, leadName: '',
+    bids: [], ends: NOW() + ri(70, 140) * 1000, bidders: makeBidders(m, ri(2, 6)), mine: false, done: false, myMax: 0 };
+}
+function newJob(opt = {}) {
+  const L = level(), best = Math.max(1, ...S.cars.map(c => carModel(c.m).prest));
+  const ws = EVENTS.map(e => e.minP <= best + 2 + Math.floor(L / 2) ? e.w : e.w * .12);
+  const e = wpick(EVENTS, ws);
+  const pay = roundNice(rand(e.pay[0], e.pay[1]) * (1 + .06 * L) * (opt.premium ? 1.3 : 1));
+  return { id: nid(), ev: e.k, who: pick(e.who), pay, dur: ri(e.dur[0], e.dur[1]) * 1000, until: NOW() + ri(300, 540) * 1000, state: 'open', premium: !!opt.premium };
+}
+const evOf = j => EVENTS.find(e => e.k === j.ev);
+function fillWorld() {
+  while (S.sellers.filter(s => s.state === 'open').length < sellerCap()) S.sellers.push(newSeller());
+  while (S.clients.filter(c => c.state === 'open').length < clientCap()) S.clients.push(newClient());
+  while (S.lots.filter(l => !l.done && !l.mine).length < lotCap()) S.lots.push(newLot());
+  while (S.jobs.filter(j => j.state === 'open').length < jobCap()) S.jobs.push(newJob());
+}
+const mark = (...k) => k.forEach(x => UI.dirty.add(x));
+const activeId = type => UI.modal && UI.modal.type === type ? +UI.modal.arg : -1;
+
+/* ---------- live auctions ---------- */
+function placeBid(lot, who, amt, you) {
+  lot.cur = amt; lot.hasBid = true; lot.lead = you ? 'you' : 'ai'; lot.leadName = who;
+  lot.bids.unshift({ who: you ? 'You' : who, amt }); if (lot.bids.length > 4) lot.bids.length = 4;
+  const left = lot.ends - NOW(); if (left < 10000) lot.ends = NOW() + 10000;
+}
+const nextBid = lot => lot.hasBid ? lot.cur + bidInc(lot.cur) : lot.start;
+function aiStep(lot) {
+  const left = lot.ends - NOW(), next = nextBid(lot);
+  const cands = lot.bidders.filter(b => b.max >= next && b.n !== lot.leadName);
+  if (!cands.length) return false;
+  if (Math.random() > (left < 10000 ? .55 : left < 30000 ? .3 : .15)) return false;
+  const b = pick(cands);
+  let amt = next;
+  if (Math.random() < .18) { const j = next + bidInc(next) * ri(1, 3); if (j <= b.max) amt = j; }
+  placeBid(lot, b.n, amt, false);
+  if (lot.myMax && lot.lead !== 'you') {
+    const mine = nextBid(lot);
+    if (mine <= lot.myMax && avail() >= mine) placeBid(lot, 'You', mine, true);
+  }
+  return true;
+}
+/* Settle a lot that ran out while the game was closed. */
+function fastFinish(lot) {
+  const ps = lot.bidders.map(b => ({ n: b.n, max: b.max, you: false }));
+  if (!lot.mine) { const yours = Math.max(lot.lead === 'you' ? lot.cur : 0, Math.min(lot.myMax || 0, avail() + (lot.lead === 'you' ? lot.cur : 0))); if (yours) ps.push({ n: 'You', max: yours, you: true }); }
+  const floor = lot.hasBid ? lot.cur : lot.start;
+  const el = ps.filter(p => p.max >= floor).sort((a, b) => b.max - a.max);
+  if (!el.length) return;
+  const w = el[0], second = el[1];
+  let price = second ? Math.min(w.max, second.max + bidInc(second.max)) : floor;
+  if (lot.leadName === w.n && !second) price = lot.cur || floor;
+  price = Math.max(price, floor);
+  lot.cur = price; lot.hasBid = true; lot.lead = w.you ? 'you' : 'ai'; lot.leadName = w.n;
+}
+function resolveLot(lot) {
+  lot.done = true; lot.doneAt = NOW();
+  const a = appraise(lot.t);
+  if (lot.mine) {
+    const o = plateById(lot.pid);
+    if (o) o.lot = null;
+    if (o && lot.hasBid && lot.cur >= lot.reserve) {
+      const net = Math.round(lot.cur * (1 - LIVE_FEE));
+      sellPlate(o, net, 'at live auction', `Hammer ${gbp(lot.cur)}, 10% fee ${gbp(lot.cur - net)}`);
+      lot.result = 'sold'; addRep(3 + 3 * a.tier); toast(`${lot.t} sold at auction for ${gbp(lot.cur)}.`);
+    } else { lot.result = 'unsold'; toast(`${lot.t} didn’t reach its reserve. It’s back in your garage.`); }
+  } else if (lot.lead === 'you') {
+    if (S.cash >= lot.cur) {
+      S.cash -= lot.cur;
+      S.owned.push({ id: nid(), t: lot.t, paid: lot.cur, dud: false, lock: false, src: 'a live auction', lot: null });
+      S.stats.wins++; log(`Won ${lot.t} at auction`, -lot.cur); addRep(4 + 4 * a.tier); SFX.deal();
+      if (!S.stats.best || a.v > S.stats.best.v) S.stats.best = { t: lot.t, v: a.v };
+      lot.result = 'won'; toast(`You won ${lot.t} for ${gbp(lot.cur)}. Real value ${gbp(mv(lot.t))}.`);
+    } else { lot.result = 'default'; addRep(-20); toast(`You couldn’t pay for ${lot.t}, so the sale was cancelled.`); SFX.bad(); }
+  } else lot.result = lot.hasBid ? 'lost' : 'nobids';
+  checkSets();
 }
 
-const matches = (b, o) => {
-  if (o.dud || o.auction) return false;
-  const a = appraise(o.t);
-  if (b.want.k === 'any') return true;
-  if (b.want.k === 'tier') return a.tier >= b.want.min;
-  return a.cats.has(b.want.cat);
-};
-const collectionValue = () => S.owned.reduce((s, o) => s + (o.dud ? 0 : mv(o.t)), 0);
+/* ---------- hire jobs ---------- */
+function canDo(job, car) {
+  const e = evOf(job), m = carModel(car.m), o = plateOn(car);
+  if (!e.bodies.includes(m.body)) return `Needs a ${e.bodies.map(b => BODY_NAME[b]).join(', ')}`;
+  if (m.prest < e.minP) return `Needs prestige ${e.minP}+`;
+  if (!o) return 'Needs a plate on it';
+  if (o.lot) return 'Its plate is at auction';
+  if (busy(car)) return 'Out on another job';
+  return '';
+}
+function jobPay(job, car) {
+  const e = evOf(job), m = carModel(car.m), a = appraise(plateOn(car).t);
+  let k = (1 + (m.prest - e.minP) * .05) * (1 + .12 * a.tier);
+  const bonus = e.bonus && (e.bonus.cat ? a.cats.has(e.bonus.cat) : a.tier >= e.bonus.tier);
+  if (bonus) k *= 1.4;
+  return { pay: roundNice(job.pay * k), bonus };
+}
+function startJob(job, car) {
+  const { pay, bonus } = jobPay(job, car);
+  car.busyUntil = NOW() + job.dur; car.job = job.id;
+  Object.assign(job, { state: 'active', carId: car.id, endsAt: car.busyUntil, payout: pay, bonus, startedAt: NOW() });
+  SFX.deal(); toast(`${carModel(car.m).name} is off to the ${evOf(job).n.toLowerCase()}.`);
+}
+function completeJob(job) {
+  const car = S.cars.find(c => c.id === job.carId), e = evOf(job);
+  job.state = 'done';
+  if (car) { car.job = null; car.busyUntil = 0; }
+  const m = car ? carModel(car.m) : null;
+  const repair = m && Math.random() < .06 ? Math.max(50, roundNice(Math.max(m.price, 3000) * .015)) : 0;
+  S.cash += job.payout - repair; S.stats.jobs++; S.stats.earnedJobs += job.payout;
+  addRep(e.rep + (job.bonus ? Math.ceil(e.rep / 2) : 0));
+  log(`${e.n} for ${job.who}`, job.payout - repair, repair ? `Paid ${gbp(job.payout)}, repairs ${gbp(repair)}` : (job.bonus ? 'Plate bonus paid' : ''));
+  S.jobLog.unshift({ n: e.n, who: job.who, car: m ? m.name : '', pay: job.payout, repair, ts: NOW() }); if (S.jobLog.length > 8) S.jobLog.length = 8;
+  SFX.cash(); toast(`${e.n} done: +${gbp(job.payout - repair)}${repair ? ` after ${gbp(repair)} of repairs` : ''}.`);
+  checkSets();
+}
+
+/* ---------- the tick ---------- */
+function tick() {
+  if (!S) return;
+  const t = NOW();
+  if (t >= S.trend.until) { newTrend(); mark('all'); toast(`Market moved: ${TREND_CATS.find(c => c.k === S.trend.hot).l} are up.`); }
+  const keep = (arr, type, k) => arr.filter(x => {
+    if (x.state === 'open' && t > x.until && activeId(type) !== x.id) { mark(k); return false; }
+    if (x.state !== 'open' && x.state !== 'active' && t > (x.doneAt || x.until) + 15000 && activeId(type) !== x.id) { mark(k); return false; }
+    return true;
+  });
+  S.sellers = keep(S.sellers, 'buy', 'deals');
+  S.clients = keep(S.clients, 'sell', 'deals').filter(c => c.state !== 'open' || t <= c.until || activeId('sellPick') === c.id || activeId('sell') === c.id);
+  S.jobs = keep(S.jobs, 'jobPick', 'jobs');
+  if (t >= S.spawn.seller) { if (S.sellers.filter(s => s.state === 'open').length < sellerCap()) S.sellers.push(newSeller()); S.spawn.seller = t + ri(30, 60) * 1000; mark('deals'); }
+  if (t >= S.spawn.client) { if (S.clients.filter(c => c.state === 'open').length < clientCap()) S.clients.push(newClient()); S.spawn.client = t + ri(45, 90) * 1000; mark('deals'); }
+  if (t >= S.spawn.job) { if (S.jobs.filter(j => j.state === 'open').length < jobCap()) S.jobs.push(newJob()); S.spawn.job = t + ri(50, 110) * 1000; mark('jobs'); }
+  if (t >= S.spawn.lot) { if (S.lots.filter(l => !l.done && !l.mine).length < lotCap()) { S.lots.push(newLot()); mark('auctions'); } S.spawn.lot = t + ri(8, 20) * 1000; }
+  for (const lot of S.lots) {
+    if (lot.done) continue;
+    if (t >= lot.ends) { resolveLot(lot); mark('auctions', 'garage'); continue; }
+    if (aiStep(lot)) UI.lotChanged = true;
+  }
+  const before = S.lots.length;
+  S.lots = S.lots.filter(l => !l.done || t - l.doneAt < 12000);
+  if (S.lots.length !== before) mark('auctions');
+  for (const j of S.jobs) if (j.state === 'active' && t >= j.endsAt) { completeJob(j); j.doneAt = t; mark('jobs', 'garage'); }
+  const waiting = S.rideReady > t;
+  if (waiting !== UI.rideWaiting) { UI.rideWaiting = waiting; mark('garage'); }
+  flush();
+  liveUpdate();
+  if (t - (UI.saved || 0) > 4000) { save(); UI.saved = t; }
+}
+const TAB_DEPS = { deals: ['deals'], auctions: ['auctions'], garage: ['garage'], jobs: ['jobs', 'garage'], shop: [], profile: [] };
+function flush() {
+  if (!UI.dirty.size) return;
+  const d = UI.dirty; UI.dirty = new Set();
+  renderHUD();
+  const needs = d.has('all') || TAB_DEPS[UI.tab].some(k => d.has(k));
+  const focused = document.activeElement && $('#main').contains(document.activeElement) && /INPUT|SELECT/.test(document.activeElement.tagName);
+  if (needs && !focused && $('#ov').hidden && $('#ride').hidden) renderMain();
+  else if (needs) UI.dirty = new Set([...UI.dirty, ...d]);
+}
+/* Catch up on whatever happened while the game was closed. */
+function catchUp() {
+  const t = NOW();
+  if (t >= S.trend.until) newTrend();
+  for (const lot of S.lots) if (!lot.done && t >= lot.ends) { fastFinish(lot); resolveLot(lot); }
+  S.lots = S.lots.filter(l => !l.done || t - l.doneAt < 12000);
+  for (const j of S.jobs) if (j.state === 'active' && t >= j.endsAt) { completeJob(j); j.doneAt = t; }
+  S.sellers = S.sellers.filter(s => s.state === 'open' ? t <= s.until : t <= (s.doneAt || s.until) + 15000);
+  S.clients = S.clients.filter(c => c.state === 'open' ? t <= c.until : t <= (c.doneAt || c.until) + 15000);
+  S.jobs = S.jobs.filter(j => j.state === 'active' || (j.state === 'open' ? t <= j.until : t <= (j.doneAt || j.until) + 15000));
+  S.cars.forEach(c => { if (c.busyUntil && c.busyUntil <= t && !S.jobs.some(j => j.id === c.job && j.state === 'active')) { c.busyUntil = 0; c.job = null; } });
+  fillWorld();
+}
 
 /* ================================================================
    Sound
@@ -835,21 +1205,22 @@ const SFX = (() => {
     g.gain.setValueAtTime(.0001, at); g.gain.exponentialRampToValueAtTime(amp, at + .01); g.gain.exponentialRampToValueAtTime(.0001, at + dur);
     o.connect(g); g.connect(out); o.start(at); o.stop(at + dur + .05);
   }
-  function noise(dur, from, to, amp) {
+  function noise(dur, from, to, amp, type = 'bandpass') {
     const c = ctx(); if (!c) return;
     const len = Math.floor(c.sampleRate * dur), buf = c.createBuffer(1, len, c.sampleRate), d = buf.getChannelData(0);
     for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
     const src = c.createBufferSource(); src.buffer = buf;
-    const bp = c.createBiquadFilter(); bp.type = 'bandpass'; bp.Q.value = 1.2;
+    const bp = c.createBiquadFilter(); bp.type = type; bp.Q.value = 1.2;
     const now = c.currentTime;
-    bp.frequency.setValueAtTime(from, now); bp.frequency.exponentialRampToValueAtTime(to, now + dur);
-    const g = c.createGain(); g.gain.setValueAtTime(amp, now); g.gain.exponentialRampToValueAtTime(.0001, now + dur);
+    bp.frequency.setValueAtTime(from, now); bp.frequency.exponentialRampToValueAtTime(to, now + dur * .5); bp.frequency.exponentialRampToValueAtTime(from, now + dur);
+    const g = c.createGain(); g.gain.setValueAtTime(.0001, now); g.gain.exponentialRampToValueAtTime(amp, now + Math.min(.8, dur * .2)); g.gain.exponentialRampToValueAtTime(.0001, now + dur);
     src.connect(bp); bp.connect(g); g.connect(out); src.start(now); src.stop(now + dur);
   }
   const now = () => (ctx() || { currentTime: 0 }).currentTime;
   return {
     click() { if (!ctx()) return; tone(900, now(), .06, .04, 'triangle'); },
     rip() { noise(.5, 600, 4000, .35); },
+    bid() { if (!ctx()) return; tone(1180, now(), .12, .05, 'triangle'); },
     flip(tier) {
       if (!ctx()) return; const t0 = now();
       const notes = [523, 587, 659, 784, 988, 1175];
@@ -861,6 +1232,7 @@ const SFX = (() => {
     cash() { if (!ctx()) return; const t0 = now(); tone(1568, t0, .5, .05); tone(2093, t0 + .08, .7, .045); },
     bad() { if (!ctx()) return; const t0 = now(); tone(220, t0, .35, .07, 'sawtooth'); tone(165, t0 + .15, .5, .06, 'sawtooth'); },
     deal() { if (!ctx()) return; const t0 = now(); tone(660, t0, .25, .05); tone(990, t0 + .1, .45, .05); },
+    engine() { noise(4.6, 140, 380, .07, 'lowpass'); },
   };
 })();
 
@@ -868,139 +1240,313 @@ const SFX = (() => {
    Rendering helpers
    ================================================================ */
 function plateHTML(t, o = {}) {
-  return `<div class="plate"${o.style ? ` style="${o.style}"` : ''}><div class="pl${P.plate === 'white' ? ' white' : ''}" role="img" aria-label="Registration ${esc(t)}"><span class="band">UK</span><span class="tw"><span class="txt">${esc(t)}</span></span>${o.dud ? '<span class="stamp">CLONED</span>' : ''}</div></div>`;
+  return `<div class="plate"><div class="pl${P.plate === 'white' ? ' white' : ''}" role="img" aria-label="Registration ${esc(t)}"><span class="band">UK</span><span class="tw"><span class="txt">${esc(t)}</span></span>${o.dud ? '<span class="stamp">CLONED</span>' : ''}</div></div>`;
 }
 const tierChip = i => `<span class="tier" style="--tc:var(--r${i})">${TIERS[i].name}</span>`;
 const avatar = (n, h) => `<span class="av" style="--h:${h}" aria-hidden="true">${esc(n[0])}</span>`;
 const pips = (n, max) => `<span class="pips" aria-label="${n} of ${max} patience left">${Array.from({ length: max }, (_, i) => `<i class="${i < n ? 'on' : ''}"></i>`).join('')}</span>`;
-const daysLeft = () => DEADLINE - S.day;
+const fmtCd = ms => { const s = Math.max(0, Math.ceil(ms / 1000)), h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60), x = s % 60; return h ? `${h}:${String(m).padStart(2, '0')}:${String(x).padStart(2, '0')}` : `${m}:${String(x).padStart(2, '0')}`; };
+const cd = (ts, pre = '') => `<span class="cd" data-cd="${ts}" data-pre="${esc(pre)}">${esc(pre)}${fmtCd(ts - NOW())}</span>`;
+const prestHTML = n => `<span class="prest" aria-label="Prestige ${n} of 10" title="Prestige ${n} of 10">${Array.from({ length: 10 }, (_, i) => `<i class="${i < n ? 'on' : ''}"></i>`).join('')}</span>`;
 
-function delLine() {
-  if (S.cleared) return `We’re square. You paid me back on day ${S.cleared}. Pleasure doing business.`;
-  const d = daysLeft(), owe = gbp(S.debt);
-  if (d === 0) return `Last day. ${owe} by tonight, or my lads come round for the lot.`;
-  if (d <= 3) return `${owe}. ${d} days. I’m losing my patience.`;
-  if (d <= 10) return `${owe} and counting. ${d} days left. Tick tock.`;
-  if (S.day === 1) return `You owe me ${owe}, plus 2.5% a day. Have it back by the end of day ${DEADLINE}. Here’s a free pack to get you going.`;
-  return `${owe} with interest. You’ve got till the end of day ${DEADLINE}. I’m a patient man.`;
+const SILL = 96;
+let svgUid = 0;
+function shade(hex, k) {
+  const n = parseInt(hex.slice(1), 16); let r = n >> 16 & 255, g = n >> 8 & 255, b = n & 255;
+  if (k >= 0) { r += (255 - r) * k; g += (255 - g) * k; b += (255 - b) * k; } else { r *= 1 + k; g *= 1 + k; b *= 1 + k; }
+  return '#' + [r, g, b].map(v => Math.round(clamp(v, 0, 255)).toString(16).padStart(2, '0')).join('');
+}
+function smooth(pts) {
+  let d = `M${pts[0][0]} ${pts[0][1]}`;
+  for (let i = 0; i < pts.length - 1; i++) {
+    const p0 = pts[i - 1] || pts[i], p1 = pts[i], p2 = pts[i + 1], p3 = pts[i + 2] || p2;
+    const c1 = [p1[0] + (p2[0] - p0[0]) / 6, p1[1] + (p2[1] - p0[1]) / 6], c2 = [p2[0] - (p3[0] - p1[0]) / 6, p2[1] - (p3[1] - p1[1]) / 6];
+    d += ` C${c1[0].toFixed(1)} ${c1[1].toFixed(1)} ${c2[0].toFixed(1)} ${c2[1].toFixed(1)} ${p2[0]} ${p2[1]}`;
+  }
+  return d;
+}
+function carSVG(m) {
+  const B = BODIES[m.body], u = 'cv' + (++svgUid);
+  const p = m.paint, hi = shade(p, .4), lo = shade(p, -.5), mid = shade(p, -.14);
+  const R = B.r, cy = 122 - R, AR = R + 5, dx = Math.sqrt(AR * AR - (cy - SILL) ** 2);
+  const x0 = B.top[0][0], x1 = B.top[B.top.length - 1][0];
+  let d = smooth(B.top) + ` L${x1} ${SILL}`;
+  [...B.wheels].sort((a, b) => b - a).forEach(wx => { d += ` L${(wx + dx).toFixed(1)} ${SILL} A${AR} ${AR} 0 0 0 ${(wx - dx).toFixed(1)} ${SILL}`; });
+  d += ` L${x0} ${SILL} Z`;
+  const glass = smooth(B.glass) + ' Z', belt = B.glass[0][1];
+  const spokes = wx => [0, 72, 144, 216, 288].map(a => `<line x1="${wx}" y1="${cy}" x2="${(wx + Math.cos(a * Math.PI / 180) * R * .6).toFixed(1)}" y2="${(cy + Math.sin(a * Math.PI / 180) * R * .6).toFixed(1)}" stroke="#3a3d44" stroke-width="2.6" stroke-linecap="round"/>`).join('');
+  const wheel = wx => `<g class="wheel" data-cx="${wx}" data-cy="${cy}"><circle cx="${wx}" cy="${cy}" r="${R}" fill="#0c0d10"/><circle cx="${wx}" cy="${cy}" r="${R - 2.6}" fill="none" stroke="#25272c" stroke-width="1.2"/><circle cx="${wx}" cy="${cy}" r="${(R * .64).toFixed(1)}" fill="url(#${u}r)"/>${spokes(wx)}<circle cx="${wx}" cy="${cy}" r="${(R * .16).toFixed(1)}" fill="#d5d8dd"/></g>`;
+  const wing = B.wing ? `<path d="M${x0 + 2} 50 L${x0 + 62} 47 L${x0 + 64} 53 L${x0 + 4} 57Z" fill="${lo}"/><rect x="${x0 + 18}" y="54" width="3" height="16" fill="${lo}"/><rect x="${x0 + 44}" y="52" width="3" height="16" fill="${lo}"/>` : '';
+  const rails = B.rails ? `<path d="M${B.rails[0]} ${B.rails[1]} L${B.rails[2]} ${B.rails[3]}" stroke="${lo}" stroke-width="3" stroke-linecap="round"/>` : '';
+  const doors = B.pillars.map(x => `<path d="M${x} ${belt + 3} L${x + 2} ${SILL - 6}" stroke="${lo}" stroke-opacity=".55" stroke-width="1"/>`).join('');
+  return `<svg class="car" viewBox="0 0 400 130" aria-hidden="true">
+    <defs>
+      <linearGradient id="${u}b" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${hi}"/><stop offset=".42" stop-color="${p}"/><stop offset=".72" stop-color="${mid}"/><stop offset="1" stop-color="${lo}"/></linearGradient>
+      <linearGradient id="${u}g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2d3748"/><stop offset=".46" stop-color="#0d1118"/><stop offset=".56" stop-color="#3b4659"/><stop offset="1" stop-color="#0a0d13"/></linearGradient>
+      <radialGradient id="${u}r" cx=".4" cy=".35" r=".8"><stop offset="0" stop-color="#f2f4f7"/><stop offset=".6" stop-color="#9aa0aa"/><stop offset="1" stop-color="#4b5059"/></radialGradient>
+      <radialGradient id="${u}s" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#000" stop-opacity=".5"/><stop offset="1" stop-color="#000" stop-opacity="0"/></radialGradient>
+      <clipPath id="${u}c"><path d="${glass}"/></clipPath>
+      <clipPath id="${u}k"><path d="${d}"/></clipPath>
+    </defs>
+    <ellipse cx="${(x0 + x1) / 2}" cy="123" rx="${(x1 - x0) / 2 + 12}" ry="7" fill="url(#${u}s)"/>
+    ${wing}${rails}
+    <path d="${d}" fill="url(#${u}b)"/>
+    <path d="${glass}" fill="url(#${u}g)"/>
+    <g clip-path="url(#${u}c)">${B.pillars.map(x => `<rect x="${x - 3}" y="0" width="6" height="${belt}" fill="${shade(p, -.25)}"/>`).join('')}<path d="M${B.glass[1][0] + 20} 0 L${B.glass[1][0] + 46} 0 L${B.glass[1][0] + 14} ${belt} L${B.glass[1][0] - 12} ${belt}Z" fill="#fff" fill-opacity=".08"/></g>
+    ${doors}
+    <path d="M${x0 + 10} ${belt + 6} Q${(x0 + x1) / 2} ${belt + 3} ${x1 - 14} ${belt + 10}" stroke="${hi}" stroke-opacity=".55" stroke-width="1.3" fill="none"/>
+    <g clip-path="url(#${u}k)">
+      <rect x="${x0 - 2}" y="${B.tl}" width="12" height="7" rx="2.5" fill="#c91f2c"/><rect x="${x0 - 2}" y="${B.tl + 1}" width="12" height="2" fill="#ff8a8a" fill-opacity=".6"/>
+      <rect x="${x1 - 13}" y="${B.hl}" width="14" height="6" rx="3" fill="#fff4d8"/>
+      <rect x="${x0}" y="${SILL - 9}" width="${x1 - x0}" height="9" fill="${lo}" fill-opacity=".55"/>
+    </g>
+    ${B.wheels.map(wheel).join('')}
+  </svg>`;
+}
+function carStageHTML(m, o) {
+  let plate = '';
+  if (o) {
+    const B = BODIES[m.body], x0 = B.top[0][0];
+    plate = `<div class="car-plate" style="left:${((x0 + 30) / 4).toFixed(2)}%;top:${((B.tl + 11) / 1.3).toFixed(2)}%">${plateHTML(o.t)}</div>`;
+  }
+  return `<div class="car-stage">${carSVG(m)}${plate}</div>`;
 }
 
 /* ================================================================
    HUD and tabs
    ================================================================ */
 function renderHUD() {
-  $('#h-day').textContent = S.cleared ? `Day ${S.day}` : `Day ${S.day} / ${DEADLINE}`;
-  $('#h-left').textContent = S.cleared ? 'Free play' : daysLeft() === 0 ? 'Last day' : `${daysLeft()} days left`;
   $('#h-cash').textContent = gbp(S.cash);
-  const d = $('#h-debt');
-  if (S.cleared || S.debt <= 0) { d.textContent = 'Clear'; d.className = 'v clear'; $('#h-debt-l').textContent = 'Del'; }
-  else { d.textContent = gbp(S.debt); d.className = 'v debt'; $('#h-debt-l').textContent = 'Owed to Del'; }
-  $('#btn-repay').hidden = !!S.cleared;
-  $('#btn-end').textContent = S.cleared || daysLeft() > 0 ? 'End day' : 'End last day';
+  const tl = tied(), th = $('#h-tied');
+  th.hidden = !tl; th.textContent = tl ? `${gbp(tl)} tied up in bids` : '';
+  $('#h-worth').textContent = gbpS(netWorth());
+  const L = level(), next = LEVELS[L + 1];
+  $('#h-lvl').textContent = `Level ${L + 1} · ${LEVELS[L][1]}`;
+  $('#h-rep').textContent = next ? `${S.rep.toLocaleString('en-GB')} / ${next[0].toLocaleString('en-GB')} rep` : `${S.rep.toLocaleString('en-GB')} rep`;
+  $('#h-bar').style.width = (next ? clamp((S.rep - LEVELS[L][0]) / (next[0] - LEVELS[L][0]), 0, 1) * 100 : 100) + '%';
   const h = TREND_CATS.find(c => c.k === S.trend.hot), c = TREND_CATS.find(x => x.k === S.trend.cold);
-  $('#trend').innerHTML = `<span class="up">▲ <b>${h.l}</b> ${pct(S.trend.hm - 1)}</span><span class="dn">▼ <b>${c.l}</b> ${pct(S.trend.cm - 1)}</span><span>${esc(h.news)}</span>`;
-  $('#g-badge').textContent = S.owned.length;
+  $('#trend').innerHTML = `<span class="up">▲ <b>${h.l}</b> ${pct(S.trend.hm - 1)}</span><span class="dn">▼ <b>${c.l}</b> ${pct(S.trend.cm - 1)}</span><span class="news">${esc(h.news)}</span><span class="muted">Market moves in ${cd(S.trend.until)}</span>`;
+  $('#dot-deals').textContent = S.sellers.filter(s => s.state === 'open').length + S.clients.filter(c => c.state === 'open' && S.owned.some(o => matches(c, o))).length || '';
+  $('#dot-auctions').textContent = S.lots.filter(l => !l.done && (l.lead === 'you' || l.mine)).length || '';
+  $('#dot-jobs').textContent = S.jobs.filter(j => j.state === 'open' && S.cars.some(car => !canDo(j, car))).length || '';
   $$('.tabs [data-tab]').forEach(b => b.setAttribute('aria-selected', String(b.dataset.tab === UI.tab)));
 }
-function render() {
-  renderHUD();
-  const m = $('#main');
-  m.innerHTML = ({ street: streetHTML, packs: packsHTML, garage: garageHTML, studio: studioHTML, kit: kitHTML })[UI.tab]();
-  if (UI.tab === 'studio') studioUpdate();
-  save();
+function renderMain() {
+  $('#main').innerHTML = ({ deals: dealsHTML, auctions: auctionsHTML, garage: garageHTML, jobs: jobsHTML, shop: shopHTML, profile: profileHTML })[UI.tab]();
+  if (UI.tab === 'shop' && UI.ssub === 'studio') studioUpdate();
+}
+function render() { checkSets(); renderHUD(); renderMain(); save(); }
+function liveUpdate() {
+  const t = NOW();
+  $$('[data-cd]').forEach(el => { el.textContent = (el.dataset.pre || '') + fmtCd(+el.dataset.cd - t); });
+  $$('[data-p0]').forEach(el => { el.style.width = clamp((t - +el.dataset.p0) / (+el.dataset.p1 - +el.dataset.p0), 0, 1) * 100 + '%'; });
+  if (UI.tab === 'auctions') S.lots.forEach(lotLive);
+  const th = $('#h-tied'), tl = tied(); th.hidden = !tl; if (tl) th.textContent = `${gbp(tl)} tied up in bids`;
+  if (UI.lotChanged) { UI.lotChanged = false; renderHUD(); }
 }
 
-/* ---------- Street ---------- */
-function streetHTML() {
-  const sellers = S.sellers.map(sellerCard).join('');
-  const buyers = S.buyers.map(buyerCard).join('');
-  return `<section class="del">${avatar('Del', 8)}<div class="txt"><b>Del</b> <span class="muted">· your lender</span><p>${esc(delLine())}</p></div>${S.cleared ? '' : '<button type="button" class="btn" data-act="repay">Pay Del</button>'}</section>
-  ${S.starter ? `<div class="starter"><p><b>Your starter pack is waiting.</b> Three free plates to sell or keep.</p><button type="button" class="btn pri" data-act="pack-buy" data-id="starter">Open it now</button></div>` : ''}
-  <h2 class="h">On the street <small>${S.sellers.filter(s => s.state === 'open').length} of ${S.sellers.length} sellers still around. Your guess is a range, not the real value.</small></h2>
-  <div class="grid">${sellers}</div>
-  <h2 class="h">Wanted <small>Buyers looking for plates today. One sale each.</small></h2>
-  <div class="grid">${buyers}</div>`;
+/* ---------- Deals ---------- */
+const payHint = pm => pm < .9 ? 'Under value' : pm < 1.1 ? 'Around value' : pm < 1.3 ? 'Above value' : 'Well above value';
+const matches = (c, o) => {
+  if (o.dud || plateLocked(o)) return false;
+  const a = appraise(o.t);
+  if (c.want.k === 'any') return true;
+  if (c.want.k === 'tier') return a.tier >= c.want.min;
+  return a.cats.has(c.want.cat);
+};
+function dealsHTML() {
+  const intro = S.intro ? `<section class="intro"><p><b>Welcome to the plate game.</b> Buy plates cheap off people on the street, sell them to private clients, and bid in the live auctions. Put your best plates on cars, cruise around and hire the cars out for proms, birthdays and weddings. There’s no end. Just see how big you can get.</p><div class="row"><button type="button" class="btn sm" data-act="intro-ok">Got it</button></div></section>` : '';
+  const starter = S.starter ? `<section class="intro"><p><b>Your starter pack is waiting.</b> Three free plates to sell or keep.</p><div class="row"><button type="button" class="btn pri sm" data-act="pack-buy" data-id="starter">Open it now</button></div></section>` : '';
+  return `${intro}${starter}
+  <h2 class="h">On the street <small>Sellers come and go. Your guess is a range, not the real value.${S.sellers.filter(s => s.state === 'open').length < sellerCap() ? ` Next seller in ${cd(S.spawn.seller)}.` : ''}</small></h2>
+  <div class="grid">${S.sellers.map(sellerCard).join('') || '<p class="empty">Nobody’s about. Someone new will turn up soon.</p>'}</div>
+  <h2 class="h">Private clients <small>People looking for a particular kind of plate. One sale each.</small></h2>
+  <div class="grid">${S.clients.map(clientCard).join('') || `<p class="empty">No clients right now. The next one gets in touch in ${cd(S.spawn.client)}.</p>`}</div>`;
 }
 function sellerCard(s) {
   const d = describe(appraise(s.t).p);
   const st = s.state === 'open' ? `<button type="button" class="btn pri" data-act="haggle" data-id="${s.id}">Haggle</button>`
     : s.state === 'bought' ? `<span class="pill good">You bought it for ${gbp(s.paid)}</span>` : `<span class="pill">Walked off</span>`;
   const chk = s.check ? `<span class="pill ${s.check === 'clean' ? 'good' : 'bad'}">${s.check === 'clean' ? 'History: clean' : 'History: cloned'}</span>` : '';
-  return `<article class="deal${s.state !== 'open' ? ' done' : ''}">
-    <header class="who">${avatar(s.n, s.hue)}<div><b>${esc(s.n)}</b><small>${esc(s.r)}</small></div></header>
+  return `<article class="card-b${s.state !== 'open' ? ' done' : ''}">
+    <header class="between"><div class="who">${avatar(s.n, s.hue)}<div><b>${esc(s.n)}</b><small>${esc(s.r)}</small></div></div>${s.state === 'open' ? `<span class="leave">Leaves in ${cd(s.until)}</span>` : ''}</header>
     ${plateHTML(s.t)}
     <div class="meta">${d.fmt} · ${d.when}${d.where ? ' · ' + d.where : ''}</div>
     <dl class="kv"><div><dt>Asking</dt><dd>${gbp(s.counter)}</dd></div><div><dt>Your guess</dt><dd>${gbpS(s.est[0])}–${gbpS(s.est[1])}</dd></div></dl>
     <div class="row">${st}${chk}</div>
   </article>`;
 }
-function payHint(pm) { return pm < .9 ? 'Under value' : pm < 1.1 ? 'Around value' : pm < 1.3 ? 'Above value' : 'Well above value'; }
-function buyerCard(b) {
-  const n = S.owned.filter(o => matches(b, o)).length;
+function clientCard(c) {
+  const n = S.owned.filter(o => matches(c, o)).length;
   let st;
-  if (b.state === 'sold') st = `<span class="pill good">Sold ${esc(b.sold.t)} for ${gbp(b.sold.p)}</span>`;
-  else if (b.state === 'gone') st = `<span class="pill">Lost interest</span>`;
-  else st = n ? `<button type="button" class="btn pri" data-act="sell-open" data-id="${b.id}">Offer a plate</button><span class="muted" style="font-size:13px">${n} of yours fit${n === 1 ? 's' : ''}</span>`
-    : `<button type="button" class="btn" disabled>Nothing of yours fits</button>`;
-  return `<article class="deal${b.state !== 'open' ? ' done' : ''}">
-    <header class="who">${avatar(b.n, b.hue)}<div><b>${esc(b.n)}</b><small>${esc(b.r)}</small></div></header>
-    <p class="want">Wants <b>${esc(b.want.l)}</b></p>
-    <dl class="kv"><div><dt>Budget</dt><dd>up to ${gbpS(b.budget)}</dd></div><div><dt>Pays</dt><dd style="font-size:17px">${payHint(b.pm)}</dd></div></dl>
+  if (c.state === 'sold') st = `<span class="pill good">Sold ${esc(c.sold.t)} for ${gbp(c.sold.p)}</span>`;
+  else if (c.state === 'gone') st = `<span class="pill">Lost interest</span>`;
+  else st = n ? `<button type="button" class="btn pri" data-act="sell-open" data-id="${c.id}">Offer a plate</button><span class="muted" style="font-size:13px">${n} of yours fit${n === 1 ? 's' : ''}</span>` : `<button type="button" class="btn" disabled>Nothing of yours fits</button>`;
+  return `<article class="card-b${c.state !== 'open' ? ' done' : ''}">
+    <header class="between"><div class="who">${avatar(c.n, c.hue)}<div><b>${esc(c.n)}</b><small>${esc(c.r)}</small></div></div>${c.state === 'open' ? `<span class="leave">Waits ${cd(c.until)}</span>` : ''}</header>
+    <p class="want">Wants <b>${esc(c.want.l)}</b></p>
+    <dl class="kv"><div><dt>Budget</dt><dd>up to ${gbpS(c.budget)}</dd></div><div><dt>Pays</dt><dd class="txt">${payHint(c.pm)}</dd></div></dl>
     <div class="row">${st}</div>
   </article>`;
 }
 
-/* ---------- Packs ---------- */
-function packArt(p, w) {
-  const n = p.slots.length;
-  return `<div class="pack art-${p.art}"${w ? ` style="--w:${w}"` : ''} aria-hidden="true"><div class="crimp"></div><div class="body"><span class="kick">${n} plate${n > 1 ? 's' : ''}</span><span class="nm">${esc(p.name.replace(' ', '<br>')).replace('&lt;br&gt;', '<br>')}</span><div class="stripe"></div><div class="mini">${plateHTML(p.art === 'dateless' || p.art === 'crate' ? '? ???' : '??? ???')}</div></div><div class="crimp"></div>${p.starter ? '<span class="free">FREE</span>' : ''}</div>`;
+/* ---------- Auctions ---------- */
+function auctionsHTML() {
+  const lots = S.lots.slice().sort((a, b) => (b.mine - a.mine) || (a.done - b.done) || (a.ends - b.ends));
+  return `<h2 class="h">Live auctions <small>Bid against the room. A bid in the last 10 seconds adds 10 seconds. You can sell your own plates here too, from the garage.</small></h2>
+  <div class="grid">${lots.map(lotCard).join('') || `<p class="empty">The next lot opens in ${cd(S.spawn.lot)}.</p>`}</div>`;
 }
-function packsHTML() {
-  const list = PACKS.filter(p => !p.starter || S.starter);
-  const tiles = list.map(p => {
-    const hit = p.slots[p.slots.length - 1];
-    const odds = TIERS.map((t, i) => hit[i] ? `<tr><td><span class="tier" style="--tc:var(--r${i})">${t.name}</span></td><td>${hit[i] < 1 ? hit[i].toFixed(1) : Math.round(hit[i])}%</td></tr>` : '').join('');
-    const can = S.cash >= p.price;
-    return `<article class="pack-tile">${packArt(p)}<h3>${esc(p.name)}</h3><p>${esc(p.blurb)}</p>
-      <span class="price">${p.price ? gbp(p.price) : 'Free'}</span>
-      <button type="button" class="btn pri" data-act="pack-buy" data-id="${p.id}" ${can ? '' : 'disabled'}>${can ? (p.price ? 'Buy and open' : 'Open') : `Need ${gbp(p.price - S.cash)} more`}</button>
-      <details class="odds"><summary>Odds for the last plate</summary><table>${odds}</table></details></article>`;
-  }).join('');
-  return `<h2 class="h">Packs <small>Every plate you pull goes in your garage. On average a pack pays back less than it costs.</small></h2><div class="packs">${tiles}</div>`;
+function lotState(lot) {
+  if (lot.done) return lot.result === 'won' || lot.result === 'sold' ? 'win' : '';
+  if (lot.mine) return 'mine';
+  if (lot.lead === 'you') return 'win';
+  if (lot.bids.some(b => b.who === 'You')) return 'out';
+  return '';
+}
+function leadText(lot) {
+  if (lot.done) return ({ won: 'You won this lot.', sold: 'Sold.', unsold: 'Unsold. It’s back in your garage.', lost: `Sold to ${lot.leadName}.`, nobids: 'No bids. Withdrawn.', default: 'Cancelled. You couldn’t pay.' })[lot.result] || 'Closed.';
+  if (lot.mine) return lot.hasBid ? (lot.cur >= lot.reserve ? `Reserve met. ${lot.leadName} leads.` : `Below your reserve of ${gbp(lot.reserve)}.`) : 'Waiting for the first bid.';
+  if (!lot.hasBid) return 'No bids yet.';
+  return lot.lead === 'you' ? 'You’re the highest bidder.' : `${lot.leadName} leads${lot.bids.some(b => b.who === 'You') ? '. You’ve been outbid.' : '.'}`;
+}
+function lotCard(lot) {
+  const d = describe(appraise(lot.t).p), urgent = !lot.done && lot.ends - NOW() < 10000;
+  const next = nextBid(lot);
+  const btns = lot.done || lot.mine ? '' : `<div class="row"><button type="button" class="btn pri" data-act="bid" data-id="${lot.id}" ${lot.lead === 'you' || avail() < next ? 'disabled' : ''}>Bid ${gbp(next)}</button><button type="button" class="btn" data-act="maxbid" data-id="${lot.id}">${lot.myMax ? `Your max ${gbpS(lot.myMax)}` : 'Set a max bid'}</button></div>`;
+  return `<article class="card-b lot ${lotState(lot)}${urgent ? ' urgent' : ''}" data-lot="${lot.id}">
+    <header class="between">${lot.done ? '<span class="pill">Closed</span>' : `<span class="live"><i></i>${lot.mine ? 'Your lot' : 'Live'}</span>`}<span class="clock" data-cd="${lot.ends}">${lot.done ? '0:00' : fmtCd(lot.ends - NOW())}</span></header>
+    ${plateHTML(lot.t)}
+    <div class="meta">${d.fmt} · ${d.when} · ${lot.mine ? `Reserve ${lot.reserve ? gbp(lot.reserve) : 'none'}` : `Estimate ${gbpS(lot.est[0])}–${gbpS(lot.est[1])}`}</div>
+    <dl class="kv"><div><dt>${lot.hasBid ? 'Current bid' : 'Opening bid'}</dt><dd class="cur">${gbp(lot.hasBid ? lot.cur : lot.start)}</dd></div><div><dt>In the room</dt><dd>${lot.bidders.length} bidders</dd></div></dl>
+    <p class="lead">${esc(leadText(lot))}</p>
+    <ul class="bids">${bidsHTML(lot)}</ul>
+    ${btns}
+  </article>`;
+}
+const bidsHTML = lot => lot.bids.map(b => `<li class="${b.who === 'You' ? 'you' : ''}"><span>${esc(b.who)}</span><span>${gbp(b.amt)}</span></li>`).join('');
+function lotLive(lot) {
+  const el = $(`[data-lot="${lot.id}"]`); if (!el) return;
+  el.className = `card-b lot ${lotState(lot)}${!lot.done && lot.ends - NOW() < 10000 ? ' urgent' : ''}`;
+  const clock = $('.clock', el); if (clock && !lot.done) clock.dataset.cd = lot.ends;
+  $('.cur', el).textContent = gbp(lot.hasBid ? lot.cur : lot.start);
+  $('dt', el).textContent = lot.hasBid ? 'Current bid' : 'Opening bid';
+  $('.lead', el).textContent = leadText(lot);
+  const bl = $('.bids', el), h = bidsHTML(lot); if (bl.innerHTML !== h) bl.innerHTML = h;
+  const b = $('[data-act="bid"]', el);
+  if (b) { const next = nextBid(lot); b.textContent = `Bid ${gbp(next)}`; b.disabled = lot.lead === 'you' || avail() < next; }
 }
 
 /* ---------- Garage ---------- */
 function garageHTML() {
-  const total = collectionValue();
-  const paid = S.owned.reduce((s, o) => s + o.paid, 0);
+  const sub = `<div class="seg subtabs" role="group" aria-label="Garage">${[['plates', `Plates (${S.owned.length})`], ['cars', `Cars (${S.cars.length}/${CAR_SLOTS[S.upg.space]})`]].map(([k, l]) => `<button type="button" data-act="gsub" data-v="${k}" aria-pressed="${UI.gsub === k}">${l}</button>`).join('')}</div>`;
+  return `<h2 class="h">Garage <small>Values move with the market.</small></h2>${sub}${UI.gsub === 'cars' ? carsHTML() : platesHTML()}`;
+}
+function platesHTML() {
+  const total = collectionValue(), paid = S.owned.reduce((s, o) => s + o.paid, 0);
   let list = S.owned.slice();
   if (UI.gFilter === 'normal') list = list.filter(o => !appraise(o.t).custom);
   if (UI.gFilter === 'custom') list = list.filter(o => appraise(o.t).custom);
-  if (UI.gFilter === 'auction') list = list.filter(o => o.auction);
+  if (UI.gFilter === 'cars') list = list.filter(o => carOf(o));
   if (UI.gTier !== 'all') list = list.filter(o => appraise(o.t).tier === +UI.gTier);
   const key = { value: o => -(o.dud ? 0 : mv(o.t)), recent: o => -o.id, profit: o => -((o.dud ? 0 : mv(o.t)) - o.paid) }[UI.gSort];
   list.sort((a, b) => key(a) - key(b));
-  const commons = S.owned.filter(o => !o.lock && !o.auction && !o.dud && appraise(o.t).tier === 0);
+  const commons = S.owned.filter(o => !o.lock && !o.dud && !plateLocked(o) && !carOf(o) && appraise(o.t).tier === 0);
   const cv = commons.reduce((s, o) => s + Math.round(mv(o.t) * DEALER), 0);
-  const chips = [['all', 'All'], ['normal', 'Normal'], ['custom', 'Custom'], ['auction', 'At auction']].map(([k, l]) => `<button type="button" class="chip" data-act="gfilter" data-v="${k}" aria-pressed="${UI.gFilter === k}">${l}</button>`).join('');
+  const chips = [['all', 'All'], ['normal', 'Normal'], ['custom', 'Custom'], ['cars', 'On cars']].map(([k, l]) => `<button type="button" class="chip" data-act="gfilter" data-v="${k}" aria-pressed="${UI.gFilter === k}">${l}</button>`).join('');
   const tierSel = `<select class="sel" id="g-tier" aria-label="Rarity"><option value="all">All rarities</option>${TIERS.map((t, i) => `<option value="${i}"${UI.gTier === String(i) ? ' selected' : ''}>${t.name}</option>`).join('')}</select>`;
   const sortSel = `<select class="sel" id="g-sort" aria-label="Sort">${[['value', 'Highest value'], ['recent', 'Newest'], ['profit', 'Best profit']].map(([v, l]) => `<option value="${v}"${UI.gSort === v ? ' selected' : ''}>${l}</option>`).join('')}</select>`;
   const cards = list.map(o => {
-    const a = appraise(o.t), m = o.dud ? 0 : mv(o.t), pl = m - o.paid;
-    const flags = [o.auction ? '<span class="pill warn">At auction tonight</span>' : '', o.lock ? '<span class="pill">Kept</span>' : '', o.dud ? '<span class="pill bad">Cloned</span>' : ''].join('');
+    const a = appraise(o.t), m = o.dud ? 0 : mv(o.t), pl = m - o.paid, car = carOf(o);
+    const flags = [o.lot ? '<span class="pill warn">At live auction</span>' : '', car ? `<span class="pill">On the ${esc(carModel(car.m).name)}</span>` : '', o.lock ? '<span class="pill">Kept</span>' : '', o.dud ? '<span class="pill bad">Cloned</span>' : ''].join('');
     return `<button type="button" class="own" style="--tc:var(--r${o.dud ? 0 : a.tier})" data-act="detail" data-id="${o.id}">
       ${plateHTML(o.t, { dud: o.dud })}
       <div class="top"><span class="val">${gbp(m)}</span>${o.dud ? '<span class="tier" style="--tc:var(--bad)">Worthless</span>' : tierChip(a.tier)}</div>
       <div class="sub"><span>${a.custom ? 'Custom' : 'Normal'} · ${describe(a.p).fmt}</span><span class="${pl >= 0 ? 'good' : 'bad'}">${pl >= 0 ? '+' : ''}${gbpS(pl)} vs paid</span></div>
       <div class="flags">${flags}</div></button>`;
   }).join('');
-  return `<h2 class="h">Garage <small>Values move with the market every day.</small></h2>
-    <div class="g-stats"><div class="stat"><small>Plates</small><span class="v">${S.owned.length}</span></div><div class="stat"><small>Market value</small><span class="v">${gbp(total)}</span></div><div class="stat"><small>Paid</small><span class="v">${gbp(paid)}</span></div><div class="stat"><small>On paper</small><span class="v ${total - paid >= 0 ? 'good' : 'bad'}">${total - paid >= 0 ? '+' : ''}${gbp(total - paid)}</span></div></div>
+  return `<div class="g-stats"><div class="stat"><small>Plates</small><span class="v">${S.owned.length}</span></div><div class="stat"><small>Market value</small><span class="v">${gbp(total)}</span></div><div class="stat"><small>Paid</small><span class="v">${gbp(paid)}</span></div><div class="stat"><small>On paper</small><span class="v ${total - paid >= 0 ? 'good' : 'bad'}">${total - paid >= 0 ? '+' : ''}${gbp(total - paid)}</span></div></div>
     <div class="filters">${chips}${tierSel}${sortSel}${commons.length ? `<button type="button" class="btn sm" data-act="sell-commons">Sell ${commons.length} common${commons.length > 1 ? 's' : ''} to the dealer for ${gbp(cv)}</button>` : ''}</div>
-    ${S.owned.length ? (list.length ? `<div class="grid">${cards}</div>` : '<p class="empty">No plates match these filters.</p>') : '<p class="empty">Your garage is empty. Buy a plate on the street or open a pack.</p>'}`;
+    ${S.owned.length ? (list.length ? `<div class="grid">${cards}</div>` : '<p class="empty">No plates match these filters.</p>') : '<p class="empty">No plates yet. Haggle on the street, win an auction or open a pack.</p>'}`;
+}
+function carsHTML() {
+  const wait = S.rideReady - NOW();
+  const cards = S.cars.map(c => {
+    const m = carModel(c.m), o = plateOn(c), a = o && appraise(o.t), job = S.jobs.find(j => j.id === c.job && j.state === 'active');
+    const status = busy(c) && job ? `<div class="meta">On a job: ${esc(evOf(job).n)} for ${esc(job.who)} · back in ${cd(c.busyUntil)}</div><div class="prog"><i data-p0="${job.startedAt}" data-p1="${job.endsAt}"></i></div>` : '';
+    const acts = busy(c) ? '' : `<div class="row">
+      <button type="button" class="btn pri" data-act="cruise" data-id="${c.id}" ${wait > 0 ? 'disabled' : ''}>${wait > 0 ? `Cruise in ${cd(S.rideReady)}` : 'Go for a cruise'}</button>
+      <button type="button" class="btn" data-act="fit-plate" data-id="${c.id}">${o ? 'Change plate' : 'Fit a plate'}</button>
+      ${o ? `<button type="button" class="btn ghost" data-act="unmount" data-id="${c.id}">Take plate off</button>` : ''}
+      <button type="button" class="btn ghost" data-act="car-sell" data-id="${c.id}">Sell</button></div>`;
+    return `<article class="car-card" style="--g:var(--r${a ? a.tier : 0})"><div class="stage-wrap">${carStageHTML(m, o)}</div>
+      <div class="car-h"><div><b>${esc(m.name)}</b><small>${esc(m.cls)}</small></div>${prestHTML(m.prest)}</div>
+      <div class="meta">${o ? `Wearing ${esc(o.t)} · ${TIERS[a.tier].name} · ${gbpS(mv(o.t))}` : 'No plate fitted. Hire jobs need one.'}</div>
+      ${status}${acts}</article>`;
+  }).join('');
+  return `<div class="between" style="margin-bottom:14px"><p class="muted" style="margin:0">Cruises are free but you can go once every 40 seconds. Better cars and plates make better things happen.</p><button type="button" class="btn sm" data-act="goto" data-tab="shop" data-sub="showroom">Showroom</button></div>
+    ${S.cars.length ? `<div class="cars">${cards}</div>` : '<p class="empty">No cars. Visit the showroom.</p>'}`;
 }
 
-/* ---------- Studio ---------- */
+/* ---------- Hire jobs ---------- */
+function jobsHTML() {
+  const open = S.jobs.filter(j => j.state === 'open'), act = S.jobs.filter(j => j.state === 'active');
+  const openCards = open.map(j => {
+    const e = evOf(j), ok = S.cars.filter(c => !canDo(j, c));
+    return `<article class="card-b">
+      <header class="between"><div><b style="font:800 22px/1 var(--f-display);text-transform:uppercase">${esc(e.n)}</b><small class="muted" style="display:block">${esc(j.who)}${j.premium ? ' · came from a cruise' : ''}</small></div><span class="leave">Expires ${cd(j.until)}</span></header>
+      <p class="want" style="margin:0">${esc(e.desc)}</p>
+      <dl class="kv"><div><dt>Pays from</dt><dd>${gbp(j.pay)}</dd></div><div><dt>Takes</dt><dd>${fmtCd(j.dur)}</dd></div></dl>
+      <p class="fine">Needs a ${e.bodies.length === 8 ? 'car of any kind' : e.bodies.map(b => BODY_NAME[b]).join(', ')}, prestige ${e.minP}+, with a plate on.${e.bonus ? ` +40% for ${e.bonus.l}.` : ''} Better plates pay more.</p>
+      <div class="row">${ok.length ? `<button type="button" class="btn pri" data-act="job-take" data-id="${j.id}">Send a car</button><span class="muted" style="font-size:13px">${ok.length} of your cars can do it</span>` : '<button type="button" class="btn" disabled>No suitable car ready</button>'}</div>
+    </article>`;
+  }).join('');
+  const actCards = act.map(j => {
+    const e = evOf(j), car = S.cars.find(c => c.id === j.carId);
+    return `<article class="card-b"><div class="between"><b>${esc(e.n)} · ${esc(j.who)}</b><span class="leave">Back in ${cd(j.endsAt)}</span></div><div class="meta">${car ? esc(carModel(car.m).name) : ''} · pays ${gbp(j.payout)}${j.bonus ? ' with plate bonus' : ''}</div><div class="prog"><i data-p0="${j.startedAt}" data-p1="${j.endsAt}"></i></div></article>`;
+  }).join('');
+  const recent = S.jobLog.map(r => `<li><span>${esc(r.n)} · ${esc(r.who)}<br><small class="muted">${esc(r.car)}${r.repair ? ` · repairs ${gbp(r.repair)}` : ''}</small></span><span class="good">+${gbp(r.pay - r.repair)}</span></li>`).join('');
+  return `<h2 class="h">Hire requests <small>People pay to hire your cars with your plates on.${open.length < jobCap() ? ` New request in ${cd(S.spawn.job)}.` : ''}</small></h2>
+    <div class="grid">${openCards || '<p class="empty">No requests right now.</p>'}</div>
+    ${act.length ? `<h2 class="h">On the road</h2><div class="grid">${actCards}</div>` : ''}
+    ${recent ? `<h2 class="h">Finished</h2><ul class="lines" style="max-width:640px">${recent}</ul>` : ''}`;
+}
+
+/* ---------- Shop: packs, showroom, studio, upgrades ---------- */
+function shopHTML() {
+  const sub = `<div class="seg subtabs" role="group" aria-label="Shop">${[['packs', 'Packs'], ['showroom', 'Car showroom'], ['studio', 'Plate studio'], ['upgrades', 'Upgrades']].map(([k, l]) => `<button type="button" data-act="ssub" data-v="${k}" aria-pressed="${UI.ssub === k}">${l}</button>`).join('')}</div>`;
+  return sub + ({ packs: packsHTML, showroom: showroomHTML, studio: studioHTML, upgrades: upgradesHTML })[UI.ssub]();
+}
+function packArt(p) {
+  const n = p.slots.length;
+  return `<div class="pack art-${p.art}" aria-hidden="true"><div class="crimp"></div><div class="body"><span class="kick">${n} plate${n > 1 ? 's' : ''}</span><span class="nm">${esc(p.name).replace(' ', '<br>')}</span><div class="stripe"></div><div class="mini">${plateHTML(p.art === 'dateless' || p.art === 'crate' ? '? ???' : '??? ???')}</div></div><div class="crimp"></div>${p.starter ? '<span class="free">FREE</span>' : ''}</div>`;
+}
+function packsHTML() {
+  const tiles = PACKS.filter(p => !p.starter || S.starter).map(p => {
+    const hit = p.slots[p.slots.length - 1];
+    const odds = TIERS.map((t, i) => hit[i] ? `<tr><td><span class="tier" style="--tc:var(--r${i})">${t.name}</span></td><td>${hit[i] < 1 ? hit[i].toFixed(1) : Math.round(hit[i])}%</td></tr>` : '').join('');
+    const can = avail() >= p.price;
+    return `<article class="pack-tile">${packArt(p)}<h3>${esc(p.name)}</h3><p>${esc(p.blurb)}</p><span class="price">${p.price ? gbp(p.price) : 'Free'}</span>
+      <button type="button" class="btn pri" data-act="pack-buy" data-id="${p.id}" ${can ? '' : 'disabled'}>${can ? (p.price ? 'Buy and open' : 'Open') : `Need ${gbp(p.price - avail())} more`}</button>
+      <details class="odds"><summary>Odds for the last plate</summary><table>${odds}</table></details></article>`;
+  }).join('');
+  return `<h2 class="h">Packs <small>Every plate you pull goes in your garage. On average a pack pays back less than it costs.</small></h2><div class="packs">${tiles}</div>`;
+}
+function showroomHTML() {
+  const slots = CAR_SLOTS[S.upg.space], full = S.cars.length >= slots;
+  const cards = CARS.filter(m => m.price > 0).map(m => {
+    const own = S.cars.some(c => c.m === m.id), can = avail() >= m.price;
+    const act = own ? '<span class="pill good">In your garage</span>' : full ? '<span class="pill warn">Lock-up full</span>' : `<button type="button" class="btn ${can ? 'pri' : ''}" data-act="car-buy" data-id="${m.id}" ${can ? '' : 'disabled'}>${can ? 'Buy' : `Need ${gbpS(m.price - avail())} more`}</button>`;
+    return `<article class="car-card" style="--g:var(--r2)"><div class="stage-wrap">${carStageHTML(m, null)}</div><div class="car-h"><div><b>${esc(m.name)}</b><small>${esc(m.cls)} · ${BODY_NAME[m.body]}</small></div>${prestHTML(m.prest)}</div><div class="between"><span class="price">${gbp(m.price)}</span>${act}</div></article>`;
+  }).join('');
+  return `<h2 class="h">Car showroom <small>${S.cars.length} of ${slots} spaces used. Prestige decides which hire jobs a car can do. Cars sell back for 70%.</small></h2><div class="cars">${cards}</div>`;
+}
+function upgradesHTML() {
+  return `<h2 class="h">Upgrades</h2><div class="kit">${UPGRADES.map(u => {
+    const l = S.upg[u.k], next = u.cost[l], can = next != null && avail() >= next;
+    return `<article class="upg"><h3>${u.name}</h3><div class="lv">${u.cost.map((_, i) => `<i class="${i < l ? 'on' : ''}"></i>`).join('')}</div><p>${esc(u.desc)}</p><p><b>${esc(u.lvl(l))}</b></p>
+      ${next == null ? '<span class="pill good">Maxed out</span>' : `<button type="button" class="btn ${can ? 'pri' : ''}" data-act="upgrade" data-k="${u.k}" ${can ? '' : 'disabled'}>Buy for ${gbp(next)}</button>`}</article>`;
+  }).join('')}</div>`;
+}
 const STUDIO_FMT = {
   cur: { l: 'Current', ex: 'BO55 MAN', hint: 'Two letters, two-digit age (02–26 or 51–75), three letters.' },
   pre: { l: 'Prefix', ex: 'S4 RAH', hint: 'A year letter, a number from 1 to 999, three letters.' },
@@ -1019,16 +1565,15 @@ function normalize(fmt, raw) {
 const takenChance = v => clamp(.12 + Math.log10(Math.max(v, 100) / 100) * .2, .12, .96);
 function studioQuote(t) {
   const a = appraise(t); if (!a) return null;
-  const taken = mulberry32(hash(t + '|' + S.day))() < takenChance(a.v);
+  const taken = mulberry32(hash(t + '|' + S.trend.seed))() < takenChance(a.v);
   return { a, taken, owned: S.owned.some(o => o.t === a.t), price: roundNice(mv(a.t) * 1.35) + 80 };
 }
 function studioHTML() {
   if (!UI.ideas.length) studioIdeas();
   const f = STUDIO_FMT[UI.studioFmt];
-  return `<h2 class="h">Plate studio <small>Design a plate and register it at the registration office. They charge more than it’s worth, plus an £80 assignment fee.</small></h2>
+  return `<h2 class="h">Plate studio <small>Design a plate and register it. The registration office charges more than it’s worth, plus an £80 assignment fee. What’s taken changes when the market moves.</small></h2>
   <div class="studio">
-    <section class="panel">
-      <h3>Design</h3>
+    <section class="panel"><h3>Design</h3>
       <div class="seg" role="group" aria-label="Format">${Object.keys(STUDIO_FMT).map(k => `<button type="button" data-act="studio-fmt" data-v="${k}" aria-pressed="${UI.studioFmt === k}">${STUDIO_FMT[k].l}</button>`).join('')}</div>
       <div class="field"><label for="studio-in">Registration</label><input id="studio-in" maxlength="9" autocomplete="off" spellcheck="false" placeholder="${f.ex}" value="${esc(UI.studioText)}"></div>
       <p class="hint" id="studio-hint">${esc(f.hint)}</p>
@@ -1039,58 +1584,58 @@ function studioHTML() {
 }
 function studioIdeas() {
   const kinds = ['curWord', 'preName', 'sufName', 'dlName', 'curPat', 'dl5'];
-  UI.ideas = Array.from({ length: 6 }, (_, i) => { for (let k = 0; k < 20; k++) { const t = GEN[kinds[i]](); if (appraise(t)) return appraise(t).t; } return 'BO55 MAN'; });
+  UI.ideas = kinds.map(k => { for (let i = 0; i < 20; i++) { const a = appraise(GEN[k]()); if (a) return a.t; } return 'BO55 MAN'; });
+}
+function tagList(a) {
+  const tm = trendMult(a);
+  return `<ul class="tags"><li><span>${esc(a.baseL)}</span><span>${gbp(a.base)}</span></li>${a.tags.map(g => `<li><span>${esc(g.l)}</span><span>×${g.m}</span></li>`).join('')}<li><span>This plate’s own quirks</span><span>×${a.noise.toFixed(2)}</span></li>${tm !== 1 ? `<li><span>The market right now</span><span>${pct(tm - 1)}</span></li>` : ''}</ul>`;
 }
 function studioUpdate() {
   const out = $('#studio-out'); if (!out) return;
   const raw = UI.studioText, f = STUDIO_FMT[UI.studioFmt];
-  const t = raw ? normalize(UI.studioFmt, raw) : null;
+  const t = raw ? normalize(UI.studioFmt, raw) : null, q = t ? studioQuote(t) : null;
   const inp = $('#studio-in'), hint = $('#studio-hint');
-  const q = t ? studioQuote(t) : null;
   inp.setAttribute('aria-invalid', String(!!raw && !q));
   hint.className = 'hint' + (raw && !q ? ' err' : '');
   hint.textContent = raw && !q ? `That isn’t a valid ${f.l.toLowerCase()} plate. ${f.hint}` : f.hint;
   if (!q) { out.innerHTML = `<h3>Preview</h3>${plateHTML(raw ? raw.toUpperCase().slice(0, 9) : f.ex)}<p class="hint">Type a registration to see what it’s worth and whether it’s free.</p>`; return; }
   const a = q.a, d = describe(a.p);
   let action;
-  if (q.owned) action = `<span class="pill good">Already in your garage</span>`;
-  else if (q.taken) action = `<span class="pill bad">Taken. Someone else already holds this one.</span>`;
-  else action = `<button type="button" class="btn pri" data-act="studio-buy" data-t="${esc(a.t)}" ${S.cash >= q.price ? '' : 'disabled'}>${S.cash >= q.price ? `Register for ${gbp(q.price)}` : `Need ${gbp(q.price - S.cash)} more`}</button>`;
+  if (q.owned) action = '<span class="pill good">Already in your garage</span>';
+  else if (q.taken) action = '<span class="pill bad">Taken. Someone else holds this one.</span>';
+  else action = `<button type="button" class="btn pri" data-act="studio-buy" data-t="${esc(a.t)}" ${avail() >= q.price ? '' : 'disabled'}>${avail() >= q.price ? `Register for ${gbp(q.price)}` : `Need ${gbp(q.price - avail())} more`}</button>`;
   out.innerHTML = `<h3>Preview</h3>${plateHTML(a.t)}
     <div class="row">${tierChip(a.tier)}<span class="pill">${a.custom ? 'Custom' : 'Normal'} · ${d.fmt} · ${d.when}</span></div>
     <dl class="kv"><div><dt>Market value</dt><dd>${gbp(mv(a.t))}</dd></div><div><dt>Office price</dt><dd>${gbp(q.price)}</dd></div></dl>
-    ${tagList(a)}
-    <div class="row">${action}</div>`;
-}
-function tagList(a) {
-  const tm = trendMult(a);
-  return `<ul class="tags"><li><span>${esc(a.baseL)}</span><span>${gbp(a.base)}</span></li>${a.tags.map(g => `<li><span>${esc(g.l)}</span><span>×${g.m}</span></li>`).join('')}<li><span>This plate’s own quirks</span><span>×${a.noise.toFixed(2)}</span></li>${tm !== 1 ? `<li><span>Today’s market</span><span>${pct(tm - 1)}</span></li>` : ''}</ul>`;
+    ${tagList(a)}<div class="row">${action}</div>`;
 }
 
-/* ---------- Kit ---------- */
-function kitHTML() {
-  const ups = UPGRADES.map(u => {
-    const l = S.upg[u.k], max = u.cost.length, next = u.cost[l];
-    return `<article class="upg"><h3>${u.name}</h3><div class="lv">${u.cost.map((_, i) => `<i class="${i < l ? 'on' : ''}"></i>`).join('')}</div><p>${esc(u.desc)}</p><p><b>${esc(u.lvl(l))}</b></p>
-      ${l >= max ? '<span class="pill good">Maxed out</span>' : `<button type="button" class="btn ${S.cash >= next ? 'pri' : ''}" data-act="upgrade" data-k="${u.k}" ${S.cash >= next ? '' : 'disabled'}>Buy for ${gbp(next)}</button>`}</article>`;
-  }).join('');
-  const st = S.stats;
-  const ledger = S.ledger.map(e => `<li><span class="d">Day ${e.d}</span><span>${esc(e.t)}${e.note ? `<br><small class="muted">${esc(e.note)}</small>` : ''}</span><span class="a ${e.a > 0 ? 'good' : e.a < 0 ? 'bad' : ''}">${e.a ? (e.a > 0 ? '+' : '') + gbp(e.a) : ''}</span></li>`).join('');
-  return `<h2 class="h">Kit <small>Upgrades pay for themselves if you use them.</small></h2><div class="kit">${ups}</div>
-  <div class="cols">
-    <section><h2 class="h">Your numbers</h2>
-      <ul class="lines"><li><span>Plates bought on the street</span><span>${st.bought}</span></li><li><span>Plates sold</span><span>${st.sold}</span></li><li><span>Profit on sales</span><span class="${st.profit >= 0 ? 'good' : 'bad'}">${gbp(st.profit)}</span></li><li><span>Packs opened</span><span>${st.packs}</span></li><li><span>Best pull</span><span>${st.best ? esc(st.best.t) + ' · ' + gbpS(st.best.v) : '—'}</span></li><li><span>Garage value today</span><span>${gbp(collectionValue())}</span></li><li><span>Net worth (cash + garage − debt)</span><span>${gbp(S.cash + collectionValue() - S.debt)}</span></li></ul>
-      <h2 class="h">How it works</h2>
-      <ol class="howto">
-        <li><b>You owe Del ${gbp(START_DEBT)}</b> and it grows 2.5% every day. Clear it by the end of day ${DEADLINE} or he takes everything.</li>
-        <li><b>Buy plates off people.</b> You only see a guess at the value. Some sellers have no idea what they’ve got. Dealers overcharge. Some plates are cloned and worth nothing, so run a history check when it smells off.</li>
-        <li><b>Sell</b> to buyers who want what you’ve got, to the dealer for half, or at the overnight auction (12% fee, results vary).</li>
-        <li><b>Packs</b> are a gamble. They pay back less than they cost on average, but the big pulls are huge.</li>
-        <li><b>The market moves every day.</b> Hot categories sell for more. Lock-up rent is ${gbp(RENT)} a day.</li>
-      </ol>
-    </section>
-    <section><h2 class="h">Ledger</h2><ul class="ledger">${ledger}</ul></section>
-  </div>`;
+/* ---------- Profile ---------- */
+function checkSets() {
+  if (!S) return;
+  for (const s of SETS) if (!S.sets[s.id] && s.test()) {
+    S.sets[s.id] = NOW(); addRep(s.rep); log(`Completed “${s.n}”`, 0, `+${s.rep} rep`); toast(`Collection set complete: ${s.n}. +${s.rep} rep.`); SFX.flip(3);
+  }
+}
+function profileHTML() {
+  const L = level(), next = LEVELS[L + 1], st = S.stats;
+  const prog = next ? clamp((S.rep - LEVELS[L][0]) / (next[0] - LEVELS[L][0]), 0, 1) * 100 : 100;
+  const sets = SETS.map(s => `<div class="set${S.sets[s.id] ? ' got' : ''}"><b>${S.sets[s.id] ? '✓ ' : ''}${esc(s.n)}</b><small>${esc(s.d)}</small><span class="rw">+${s.rep} rep</span></div>`).join('');
+  const ledger = S.ledger.map(e => `<li><span>${esc(e.t)}${e.note ? `<br><small>${esc(e.note)}</small>` : ''}</span><span class="a ${e.a > 0 ? 'good' : e.a < 0 ? 'bad' : ''}">${e.a ? (e.a > 0 ? '+' : '') + gbp(e.a) : ''}</span></li>`).join('');
+  return `<section class="rank"><span class="badge">${L + 1}</span><div><h3>${LEVELS[L][1]}</h3><p>${next ? `${(next[0] - S.rep).toLocaleString('en-GB')} rep to ${next[1]}. Higher levels bring rarer auction lots, richer clients and bigger hire jobs.` : 'Top of the game.'}</p><div class="bar"><i style="width:${prog}%"></i></div></div></section>
+  <h2 class="h">Collection sets <small>${Object.keys(S.sets).length} of ${SETS.length} done.</small></h2><div class="sets">${sets}</div>
+  <div class="cols"><section>
+    <h2 class="h">Your numbers</h2>
+    <ul class="lines"><li><span>Net worth</span><span>${gbp(netWorth())}</span></li><li><span>Plates bought on the street</span><span>${st.bought}</span></li><li><span>Live auctions won</span><span>${st.wins}</span></li><li><span>Plates sold</span><span>${st.sold}</span></li><li><span>Profit on plate sales</span><span class="${st.profit >= 0 ? 'good' : 'bad'}">${gbp(st.profit)}</span></li><li><span>Hire jobs done</span><span>${st.jobs} · ${gbp(st.earnedJobs)}</span></li><li><span>Cruises</span><span>${st.rides}</span></li><li><span>Packs opened</span><span>${st.packs}</span></li><li><span>Best pull</span><span>${st.best ? esc(st.best.t) + ' · ' + gbpS(st.best.v) : '—'}</span></li></ul>
+    <h2 class="h">How it works</h2>
+    <ol class="howto">
+      <li><b>Buy plates off people.</b> You only see a guess at the value. Some sellers have no idea what they’ve got. Dealers overcharge. Some plates are cloned, so check the history when something smells off.</li>
+      <li><b>Sell</b> to private clients who want what you’ve got, at a live auction, or to the dealer for half.</li>
+      <li><b>Live auctions</b> run in real time. Set a max bid and it bids for you, even while you’re away.</li>
+      <li><b>Cars</b> earn money. Fit a plate, send them on hire jobs, or cruise around and see what happens.</li>
+      <li><b>The market moves</b> every few minutes. Hot categories sell for more.</li>
+    </ol>
+  </section><section><h2 class="h">Ledger</h2><ul class="ledger">${ledger}</ul></section></div>`;
 }
 
 /* ================================================================
@@ -1103,26 +1648,19 @@ function drawModal(focusSel) {
   if (!UI.modal) return;
   const html = MODALS[UI.modal.type](UI.modal.arg);
   if (html == null) { closeModal(); return; }
-  const m = $('#modal'), sh = $('#sheet');
-  sh.innerHTML = html;
-  m.hidden = false;
+  const sh = $('#sheet');
+  sh.innerHTML = html; $('#modal').hidden = false;
   const f = (focusSel && $(focusSel, sh)) || $('[data-focus]', sh) || $('.btn.pri:not(:disabled)', sh) || $('button', sh);
   if (f) try { f.focus({ preventScroll: true }); } catch (e) {}
 }
-function closeModal() {
-  const was = UI.modal;
-  UI.modal = null; $('#modal').hidden = true; $('#sheet').innerHTML = '';
-  if (was && was.type === 'over') { newGame(); UI.tab = 'street'; }
-  render();
-}
+function closeModal() { UI.modal = null; $('#modal').hidden = true; $('#sheet').innerHTML = ''; render(); }
 
 /* ---------- buying from a seller ---------- */
 const sellerById = id => S.sellers.find(s => s.id === +id);
 MODALS.buy = id => {
   const s = sellerById(id); if (!s) return null;
   if (s.result) return buyResultHTML(s);
-  const d = describe(appraise(s.t).p), free = !!S.upg.hpi;
-  const sug = roundNice(Math.min(s.counter * .7, s.est[0]));
+  const d = describe(appraise(s.t).p), free = !!S.upg.hpi, sug = roundNice(Math.min(s.counter * .7, s.est[0]));
   return `${X_BTN}<h2 id="sheet-h">Haggle with ${esc(s.n)}</h2>
     <header class="who">${avatar(s.n, s.hue)}<div><b>${esc(s.n)}</b><small>${esc(s.r)}</small></div></header>
     <p class="say ${s.mood}">“${esc(s.msg)}”</p>
@@ -1134,10 +1672,10 @@ MODALS.buy = id => {
     <div class="acts">
       <button type="button" class="btn ghost" data-act="walk" data-id="${s.id}">Walk away</button>
       <button type="button" class="btn" data-act="check" data-id="${s.id}" ${s.check ? 'disabled' : ''}>${s.check ? 'Checked' : free ? 'Check history (free)' : `Check history (${gbp(CHECK_FEE)})`}</button>
-      <button type="button" class="btn" data-act="pay-ask" data-id="${s.id}" ${S.cash >= s.counter ? '' : 'disabled'}>Pay ${gbp(s.counter)}</button>
+      <button type="button" class="btn" data-act="pay-ask" data-id="${s.id}" ${avail() >= s.counter ? '' : 'disabled'}>Pay ${gbp(s.counter)}</button>
       <button type="button" class="btn pri" data-act="offer" data-id="${s.id}">Make offer</button>
     </div>
-    <p class="fine">You have ${gbp(S.cash)}. Lowballing too hard uses up their patience faster.</p>`;
+    <p class="fine">You have ${gbp(avail())} to spend. Lowballing too hard uses up their patience faster.</p>`;
 };
 function buyResultHTML(s) {
   const r = s.result, a = appraise(s.t);
@@ -1148,13 +1686,13 @@ function buyResultHTML(s) {
     <div class="row">${tierChip(a.tier)}<span class="pill">${a.custom ? 'Custom' : 'Normal'}</span></div>
     <dl class="kv three"><div><dt>You paid</dt><dd>${gbp(r.price)}</dd></div><div><dt>Real value</dt><dd>${gbp(m)}</dd></div><div><dt>On paper</dt><dd class="${diff >= 0 ? 'good' : 'bad'}">${diff >= 0 ? '+' : ''}${gbp(diff)}</dd></div></dl>
     ${tagList(a)}
-    <div class="acts"><button type="button" class="btn" data-act="goto-garage">See garage</button><button type="button" class="btn pri" data-act="close">Back to the street</button></div>`;
+    <div class="acts"><button type="button" class="btn" data-act="goto" data-tab="garage" data-sub="plates">See garage</button><button type="button" class="btn pri" data-act="close">Back to the street</button></div>`;
 }
 function buyFrom(s, price) {
-  if (S.cash < price) { toast(`You only have ${gbp(S.cash)}.`); return; }
-  S.cash -= price; s.state = 'bought'; s.paid = price; s.result = { kind: 'bought', price };
-  S.owned.push({ id: nid(), t: s.t, paid: price, day: S.day, dud: s.dodgy, lock: false, auction: false, src: s.n });
-  S.stats.bought++;
+  if (avail() < price) { toast(`You only have ${gbp(avail())} to spend.`); return; }
+  S.cash -= price; s.state = 'bought'; s.paid = price; s.result = { kind: 'bought', price }; s.doneAt = NOW();
+  S.owned.push({ id: nid(), t: s.t, paid: price, dud: s.dodgy, lock: false, src: s.n, lot: null });
+  S.stats.bought++; addRep(3);
   log(`Bought ${s.t} from ${s.n}`, -price, s.dodgy ? 'Turned out to be cloned' : '');
   if (s.dodgy) SFX.bad(); else SFX.deal();
 }
@@ -1168,78 +1706,82 @@ const SAY = {
 function sellerRespond(s, x) {
   x = Math.round(x);
   if (!(x > 0)) { toast('Enter an offer in pounds.'); return; }
-  if (x > S.cash) { toast(`You only have ${gbp(S.cash)}.`); return; }
+  if (x > avail()) { toast(`You only have ${gbp(avail())} to spend.`); return; }
   if (x >= s.counter) { buyFrom(s, s.counter); s.msg = pick(SAY.yes); return; }
-  const ratio = x / s.reserve;
   if (x >= s.reserve) {
     const p = .45 + .55 * (x - s.reserve) / Math.max(1, s.counter - s.reserve);
     if (Math.random() < p) { buyFrom(s, x); s.msg = pick(SAY.yes); return; }
     s.counter = Math.max(x + 1, roundNice(s.counter - (s.counter - x) * .5));
     s.pat--; s.msg = `${pick(SAY.close)} ${gbp(s.counter)}?`; s.mood = 'warn';
-  } else if (ratio < .55) {
+  } else if (x / s.reserve < .55) {
     s.pat -= 2; s.msg = pick(SAY.insult); s.mood = 'bad';
   } else {
     s.counter = Math.max(s.reserve, roundNice(s.counter - (s.counter - x) * rand(.15, .35)));
     s.pat--; s.msg = `${pick(SAY.far)} ${gbp(s.counter)}.`; s.mood = '';
   }
-  if (s.pat <= 0) { s.state = 'gone'; s.msg = pick(SAY.walk); s.result = { kind: 'gone' }; SFX.bad(); }
+  if (s.pat <= 0) { s.state = 'gone'; s.doneAt = NOW(); s.msg = pick(SAY.walk); s.result = { kind: 'gone' }; SFX.bad(); }
 }
 
-/* ---------- selling to a buyer ---------- */
-const buyerById = id => S.buyers.find(b => b.id === +id);
+/* ---------- selling to a client ---------- */
+const clientById = id => S.clients.find(c => c.id === +id);
 MODALS.sellPick = id => {
-  const b = buyerById(id); if (!b) return null;
-  const list = S.owned.filter(o => matches(b, o)).sort((x, y) => mv(y.t) - mv(x.t));
-  if (!list.length) return `${X_BTN}<h2 id="sheet-h">Nothing fits</h2><p>${esc(b.n)} wants ${esc(b.want.l)}. You don’t have one.</p>`;
-  return `${X_BTN}<h2 id="sheet-h">Offer ${esc(b.n)} a plate</h2>
-    <p class="say">“I’m after ${esc(b.want.l)}. Budget’s about ${gbpS(b.budget)}.”</p>
-    <div class="picks">${list.map(o => { const a = appraise(o.t); return `<button type="button" class="pick" data-act="sell-pick" data-id="${b.id}" data-pid="${o.id}">${plateHTML(o.t)}<span><b>${gbp(mv(o.t))}</b><br><small class="muted">Paid ${gbp(o.paid)}</small></span>${tierChip(a.tier)}</button>`; }).join('')}</div>`;
+  const c = clientById(id); if (!c) return null;
+  const list = S.owned.filter(o => matches(c, o)).sort((x, y) => mv(y.t) - mv(x.t));
+  if (!list.length) return `${X_BTN}<h2 id="sheet-h">Nothing fits</h2><p>${esc(c.n)} wants ${esc(c.want.l)}. You don’t have one free to sell.</p>`;
+  return `${X_BTN}<h2 id="sheet-h">Offer ${esc(c.n)} a plate</h2>
+    <p class="say">“I’m after ${esc(c.want.l)}. Budget’s about ${gbpS(c.budget)}.”</p>
+    <div class="picks">${list.map(o => { const a = appraise(o.t), car = carOf(o); return `<button type="button" class="pick" data-act="sell-pick" data-id="${c.id}" data-pid="${o.id}">${plateHTML(o.t)}<span><b>${gbp(mv(o.t))}</b><small>Paid ${gbp(o.paid)}${car ? ` · comes off the ${esc(carModel(car.m).name)}` : ''}</small></span>${tierChip(a.tier)}</button>`; }).join('')}</div>`;
 };
 MODALS.sell = id => {
-  const b = buyerById(id); if (!b || !b.deal) return null;
-  const o = S.owned.find(x => x.id === b.deal.pid), dl = b.deal;
-  if (dl.result) return sellResultHTML(b, dl);
-  if (!o) return null;
+  const c = clientById(id); if (!c || !c.deal) return null;
+  const dl = c.deal; if (dl.result) return sellResultHTML(c, dl);
+  const o = plateById(dl.pid); if (!o) return null;
   const m = mv(o.t), sug = roundNice(Math.max(dl.offer * 1.25, m));
-  return `${X_BTN}<h2 id="sheet-h">Sell to ${esc(b.n)}</h2>
-    <header class="who">${avatar(b.n, b.hue)}<div><b>${esc(b.n)}</b><small>${esc(b.r)}</small></div></header>
+  return `${X_BTN}<h2 id="sheet-h">Sell to ${esc(c.n)}</h2>
+    <header class="who">${avatar(c.n, c.hue)}<div><b>${esc(c.n)}</b><small>${esc(c.r)}</small></div></header>
     <p class="say ${dl.mood}">“${esc(dl.msg)}”</p>
     ${plateHTML(o.t)}
-    <dl class="kv three"><div><dt>Their offer</dt><dd>${gbp(dl.offer)}</dd></div><div><dt>Market value</dt><dd>${gbp(m)}</dd></div><div><dt>Patience</dt><dd>${pips(dl.pat, b.pat)}</dd></div></dl>
+    <dl class="kv three"><div><dt>Their offer</dt><dd>${gbp(dl.offer)}</dd></div><div><dt>Market value</dt><dd>${gbp(m)}</dd></div><div><dt>Patience</dt><dd>${pips(dl.pat, c.pat)}</dd></div></dl>
     <div class="offer"><label for="ask-in">Your price</label><div class="money"><span>£</span><input id="ask-in" type="number" inputmode="numeric" min="1" step="1" value="${sug}" data-focus></div>
       <div class="row">${[1.1, 1.25, 1.5].map(k => `<button type="button" class="btn sm" data-act="set-ask" data-v="${roundNice(dl.offer * k)}">${pct(k - 1)} · ${gbpS(roundNice(dl.offer * k))}</button>`).join('')}<button type="button" class="btn sm" data-act="set-ask" data-v="${roundNice(m)}">Market · ${gbpS(roundNice(m))}</button></div></div>
     <div class="acts">
-      <button type="button" class="btn ghost" data-act="sell-walk" data-id="${b.id}">Keep the plate</button>
-      <button type="button" class="btn" data-act="take-offer" data-id="${b.id}">Take ${gbp(dl.offer)}</button>
-      <button type="button" class="btn pri" data-act="ask" data-id="${b.id}">Ask this price</button>
+      <button type="button" class="btn ghost" data-act="sell-walk" data-id="${c.id}">Keep the plate</button>
+      <button type="button" class="btn" data-act="take-offer" data-id="${c.id}">Take ${gbp(dl.offer)}</button>
+      <button type="button" class="btn pri" data-act="ask" data-id="${c.id}">Ask this price</button>
     </div>
-    <p class="fine">You paid ${gbp(o.paid)}. Walking away keeps the plate but ends this buyer’s interest for today.</p>`;
+    <p class="fine">You paid ${gbp(o.paid)}. Keeping the plate ends this client’s interest.</p>`;
 };
-function sellResultHTML(b, dl) {
-  if (dl.result.kind === 'gone') return `${X_BTN}<h2 id="sheet-h">${esc(b.n)} lost interest</h2><p class="say bad">“${esc(dl.msg)}”</p><div class="acts"><button type="button" class="btn pri" data-act="close">OK</button></div>`;
+function sellResultHTML(c, dl) {
+  if (dl.result.kind === 'gone') return `${X_BTN}<h2 id="sheet-h">${esc(c.n)} lost interest</h2><p class="say bad">“${esc(dl.msg)}”</p><div class="acts"><button type="button" class="btn pri" data-act="close">OK</button></div>`;
   const r = dl.result;
   return `${X_BTN}<h2 id="sheet-h">Sold</h2>${plateHTML(r.t)}<p class="say good">“${esc(dl.msg)}”</p>
     <dl class="kv three"><div><dt>Sold for</dt><dd>${gbp(r.price)}</dd></div><div><dt>You paid</dt><dd>${gbp(r.paid)}</dd></div><div><dt>Profit</dt><dd class="${r.price - r.paid >= 0 ? 'good' : 'bad'}">${r.price - r.paid >= 0 ? '+' : ''}${gbp(r.price - r.paid)}</dd></div></dl>
     <div class="acts"><button type="button" class="btn pri" data-act="close">Nice</button></div>`;
 }
-function startSell(b, pid) {
-  const o = S.owned.find(x => x.id === +pid); if (!o) return;
-  const m = mv(o.t), top = Math.min(b.budget, m * b.pm * (S.upg.tongue ? 1.05 : 1));
-  const offer = Math.max(5, roundNice(top * rand(.68, .85)));
-  b.deal = { pid: o.id, offer: Math.min(offer, Math.floor(top)), max: Math.floor(top), pat: b.pat, msg: `I’ll give you ${gbp(Math.min(offer, Math.floor(top)))} for it.`, mood: '' };
+function startSell(c, pid) {
+  const o = plateById(+pid); if (!o) return;
+  const top = Math.floor(Math.min(c.budget, mv(o.t) * c.pm * (S.upg.tongue ? 1.05 : 1)));
+  const offer = Math.min(top, Math.max(5, roundNice(top * rand(.68, .85))));
+  c.deal = { pid: o.id, offer, max: top, pat: c.pat, msg: `I’ll give you ${gbp(offer)} for it.`, mood: '' };
 }
 function sellPlate(o, price, via, note) {
   S.cash += price; S.stats.sold++; S.stats.profit += price - o.paid;
+  S.cars.forEach(c => { if (c.plate === o.id) c.plate = null; });
   S.owned = S.owned.filter(x => x.id !== o.id);
   log(`Sold ${o.t} ${via}`, price, note || `Paid ${gbp(o.paid)}`);
   SFX.cash();
 }
-function buyerRespond(b, x) {
-  const dl = b.deal, o = S.owned.find(y => y.id === dl.pid);
+function clientRespond(c, x) {
+  const dl = c.deal, o = plateById(dl.pid);
   x = Math.round(x);
   if (!(x > 0)) { toast('Enter a price in pounds.'); return; }
   if (!o) return;
-  const done = price => { dl.result = { kind: 'sold', price, paid: o.paid, t: o.t }; b.state = 'sold'; b.sold = { t: o.t, p: price }; sellPlate(o, price, `to ${b.n}`); dl.msg = pick(['Lovely. Pleasure doing business.', 'Deal. The missus will love it.', 'Done. I’ll transfer it now.']); };
+  const done = price => {
+    const a = appraise(o.t);
+    dl.result = { kind: 'sold', price, paid: o.paid, t: o.t }; c.state = 'sold'; c.doneAt = NOW(); c.sold = { t: o.t, p: price };
+    sellPlate(o, price, `to ${c.n}`); addRep(6 + 4 * a.tier);
+    dl.msg = pick(['Lovely. Pleasure doing business.', 'Deal. They’ll love it.', 'Done. I’ll transfer it now.']);
+  };
   if (x <= dl.offer) { done(x); return; }
   if (x <= dl.max) {
     const p = .4 + .6 * (dl.max - x) / Math.max(1, dl.max - dl.offer);
@@ -1252,89 +1794,87 @@ function buyerRespond(b, x) {
     dl.offer = Math.min(dl.max, roundNice(dl.offer + (dl.max - dl.offer) * rand(.2, .45)));
     dl.pat--; dl.msg = `Too rich for me. ${gbp(dl.offer)}, final-ish.`; dl.mood = '';
   }
-  if (dl.pat <= 0) { b.state = 'gone'; dl.result = { kind: 'gone' }; dl.msg = pick(['I’ll look elsewhere, thanks.', 'Forget it. Too much hassle.']); SFX.bad(); }
+  if (dl.pat <= 0) { c.state = 'gone'; c.doneAt = NOW(); dl.result = { kind: 'gone' }; dl.msg = pick(['I’ll look elsewhere, thanks.', 'Forget it. Too much hassle.']); SFX.bad(); }
 }
 
-/* ---------- garage detail ---------- */
+/* ---------- plate detail ---------- */
 MODALS.detail = id => {
-  const o = S.owned.find(x => x.id === +id); if (!o) return null;
-  const a = appraise(o.t), d = describe(a.p), m = o.dud ? 0 : mv(o.t), deal = Math.round(m * DEALER);
+  const o = plateById(+id); if (!o) return null;
+  const a = appraise(o.t), d = describe(a.p), m = o.dud ? 0 : mv(o.t), car = carOf(o), lockd = plateLocked(o);
   if (o.dud) return `${X_BTN}<h2 id="sheet-h">${esc(o.t)}</h2>${plateHTML(o.t, { dud: true })}<p class="say bad">A cloned plate with no V750 certificate. Nobody can legally buy it. You paid ${gbp(o.paid)} to ${esc(o.src)}.</p><div class="acts"><button type="button" class="btn danger" data-act="scrap" data-id="${o.id}">Scrap it</button><button type="button" class="btn pri" data-act="close">Close</button></div>`;
+  const lot = o.lot && S.lots.find(l => l.id === o.lot);
+  const status = lot ? `<p class="say warn">At live auction now. ${lot.hasBid ? `Current bid ${gbp(lot.cur)}.` : 'No bids yet.'} Ends in ${cd(lot.ends)}.</p>` : car ? `<p class="say">On the ${esc(carModel(car.m).name)}${busy(car) ? ', which is out on a job' : ''}.</p>` : '';
   return `${X_BTN}<h2 id="sheet-h">${esc(o.t)}</h2>${plateHTML(o.t)}
     <div class="row">${tierChip(a.tier)}<span class="pill">${a.custom ? 'Custom' : 'Normal'} · ${d.fmt} · ${d.when}${d.where ? ' · ' + d.where : ''}</span></div>
+    ${status}
     <dl class="kv three"><div><dt>Market value</dt><dd>${gbp(m)}</dd></div><div><dt>You paid</dt><dd>${gbp(o.paid)}</dd></div><div><dt>On paper</dt><dd class="${m - o.paid >= 0 ? 'good' : 'bad'}">${m - o.paid >= 0 ? '+' : ''}${gbp(m - o.paid)}</dd></div></dl>
     ${tagList(a)}
-    <p class="fine">From ${esc(o.src)} on day ${o.day}. Auction sells overnight for roughly 60%–160% of value, less a 12% fee, and sometimes nobody bids.</p>
-    <div class="acts">
-      <button type="button" class="btn" data-act="lock" data-id="${o.id}">${o.lock ? 'Unmark as kept' : 'Mark as kept'}</button>
-      <button type="button" class="btn" data-act="auction" data-id="${o.id}" ${o.lock ? 'disabled' : ''}>${o.auction ? 'Take out of auction' : 'Put in tonight’s auction'}</button>
-      <button type="button" class="btn pri" data-act="dealer" data-id="${o.id}" ${o.lock || o.auction ? 'disabled' : ''}>Sell to dealer for ${gbp(deal)}</button>
-    </div>`;
+    <p class="fine">From ${esc(o.src)}.</p>
+    ${lockd ? '' : `<div class="acts">
+      <button type="button" class="btn ghost" data-act="lock" data-id="${o.id}">${o.lock ? 'Unmark as kept' : 'Mark as kept'}</button>
+      ${car ? `<button type="button" class="btn" data-act="unmount" data-id="${car.id}">Take off the car</button>` : `<button type="button" class="btn" data-act="mount-plate" data-id="${o.id}" ${S.cars.length ? '' : 'disabled'}>Put on a car</button>`}
+      <button type="button" class="btn" data-act="list-auction" data-id="${o.id}" ${o.lock ? 'disabled' : ''}>Sell at live auction</button>
+      <button type="button" class="btn pri" data-act="dealer" data-id="${o.id}" ${o.lock ? 'disabled' : ''}>Sell to dealer for ${gbp(Math.round(m * DEALER))}</button>
+    </div>`}`;
 };
-
-/* ---------- repay, day end, win, lose, settings ---------- */
-MODALS.repay = () => {
-  if (S.cleared) return null;
-  const max = Math.min(S.cash, Math.ceil(S.debt));
-  return `${X_BTN}<h2 id="sheet-h">Pay Del</h2><p class="say">“${esc(delLine())}”</p>
-    <dl class="kv"><div><dt>You owe</dt><dd class="bad">${gbp(S.debt)}</dd></div><div><dt>Cash</dt><dd>${gbp(S.cash)}</dd></div></dl>
-    <div class="offer"><label for="repay-in">Amount</label><div class="money"><span>£</span><input id="repay-in" type="number" inputmode="numeric" min="1" step="1" value="${max}" data-focus></div>
-    <div class="row">${[.25, .5].map(k => `<button type="button" class="btn sm" data-act="set-repay" data-v="${Math.floor(max * k)}">${k * 100}% · ${gbpS(Math.floor(max * k))}</button>`).join('')}<button type="button" class="btn sm" data-act="set-repay" data-v="${max}">All I can · ${gbpS(max)}</button></div></div>
-    <div class="acts"><button type="button" class="btn ghost" data-act="close">Not now</button><button type="button" class="btn pri" data-act="repay-go" ${max > 0 ? '' : 'disabled'}>Pay</button></div>
-    <p class="fine">Interest is 2.5% a day on whatever you still owe.</p>`;
+MODALS.auctionSell = id => {
+  const o = plateById(+id); if (!o) return null;
+  const m = mv(o.t);
+  return `${X_BTN}<h2 id="sheet-h">Sell ${esc(o.t)} at auction</h2>${plateHTML(o.t)}
+    <p>The lot runs for 90 seconds in front of a live room. The house takes 10% of the hammer price. If bidding doesn’t reach your reserve, the plate comes back to you.</p>
+    <dl class="kv"><div><dt>Market value</dt><dd>${gbp(m)}</dd></div><div><dt>You paid</dt><dd>${gbp(o.paid)}</dd></div></dl>
+    <div class="offer"><label for="reserve-in">Reserve price (0 for none)</label><div class="money"><span>£</span><input id="reserve-in" type="number" inputmode="numeric" min="0" step="1" value="${roundNice(m * .8)}" data-focus></div>
+    <div class="row">${[0, .7, .9, 1].map(k => `<button type="button" class="btn sm" data-act="set-reserve" data-v="${k ? roundNice(m * k) : 0}">${k ? `${Math.round(k * 100)}% · ${gbpS(roundNice(m * k))}` : 'No reserve'}</button>`).join('')}</div></div>
+    <div class="acts"><button type="button" class="btn ghost" data-act="close">Cancel</button><button type="button" class="btn pri" data-act="list-go" data-id="${o.id}">Start the auction</button></div>`;
 };
-MODALS.day = r => `<h2 id="sheet-h">Day ${r.day} closed</h2>
-  <ul class="lines">${r.lines.map(l => `<li><span>${esc(l[0])}</span><span class="${l[1] > 0 ? 'good' : l[1] < 0 ? 'bad' : ''}">${l[2] || (l[1] ? (l[1] > 0 ? '+' : '') + gbp(l[1]) : '')}</span></li>`).join('')}</ul>
-  <dl class="kv three"><div><dt>Cash</dt><dd>${gbp(S.cash)}</dd></div><div><dt>Owed to Del</dt><dd class="${S.debt > 0 ? 'bad' : 'good'}">${S.debt > 0 ? gbp(S.debt) : 'Clear'}</dd></div><div><dt>Garage</dt><dd>${gbp(collectionValue())}</dd></div></dl>
-  <p class="say">Tomorrow: ${esc(TREND_CATS.find(c => c.k === S.trend.hot).news)}</p>
-  ${S.cleared ? '' : `<p class="say ${daysLeft() <= 5 ? 'bad' : ''}">Del: “${esc(delLine())}”</p>`}
-  <div class="acts"><button type="button" class="btn pri" data-act="close">Start day ${S.day}</button></div>`;
-MODALS.win = () => `<h2 id="sheet-h">You’re square with Del</h2><p class="say good">“Fair play. Paid in full on day ${S.cleared}. Didn’t think you had it in you.”</p>
-  <p>The debt is gone and there’s no more interest. Keep trading as long as you like and grow the garage.</p>
-  <dl class="kv"><div><dt>Cash</dt><dd>${gbp(S.cash)}</dd></div><div><dt>Garage</dt><dd>${gbp(collectionValue())}</dd></div></dl>
-  <div class="acts"><button type="button" class="btn pri" data-act="close">Keep hustling</button></div>`;
-MODALS.over = () => `<h2 id="sheet-h">Del’s lads came round</h2><p class="say bad">“Day ${DEADLINE}’s gone and you still owe me ${gbp(S.debt)}. We’ll take the plates, the cash and the lock-up keys.”</p>
-  <ul class="lines"><li><span>Plates bought</span><span>${S.stats.bought}</span></li><li><span>Plates sold</span><span>${S.stats.sold}</span></li><li><span>Packs opened</span><span>${S.stats.packs}</span></li><li><span>Best pull</span><span>${S.stats.best ? esc(S.stats.best.t) + ' · ' + gbpS(S.stats.best.v) : '—'}</span></li></ul>
-  <div class="acts"><button type="button" class="btn pri" data-act="close">Start again</button></div>`;
+MODALS.maxbid = id => {
+  const lot = S.lots.find(l => l.id === +id); if (!lot || lot.done) return null;
+  const next = nextBid(lot);
+  return `${X_BTN}<h2 id="sheet-h">Max bid on ${esc(lot.t)}</h2>${plateHTML(lot.t)}
+    <p>We’ll bid for you, one step at a time, up to this amount. It keeps working while the game is closed.</p>
+    <dl class="kv"><div><dt>${lot.hasBid ? 'Current bid' : 'Opening bid'}</dt><dd>${gbp(lot.hasBid ? lot.cur : lot.start)}</dd></div><div><dt>Estimate</dt><dd>${gbpS(lot.est[0])}–${gbpS(lot.est[1])}</dd></div></dl>
+    <div class="offer"><label for="max-in">Your max bid</label><div class="money"><span>£</span><input id="max-in" type="number" inputmode="numeric" min="${next}" step="1" value="${lot.myMax || roundNice(lot.est[0])}" data-focus></div></div>
+    <div class="acts">${lot.myMax ? `<button type="button" class="btn ghost" data-act="maxbid-clear" data-id="${lot.id}">Remove max bid</button>` : ''}<button type="button" class="btn pri" data-act="maxbid-go" data-id="${lot.id}">Set max bid</button></div>
+    <p class="fine">You have ${gbp(avail())} free to bid with.</p>`;
+};
+MODALS.mountPick = id => {
+  const o = plateById(+id); if (!o) return null;
+  return `${X_BTN}<h2 id="sheet-h">Put ${esc(o.t)} on a car</h2>
+    <div class="picks">${S.cars.map(c => { const m = carModel(c.m), cur = plateOn(c); return `<button type="button" class="pick carpick" data-act="mount-pick" data-car="${c.id}" data-pid="${o.id}" ${busy(c) ? 'disabled' : ''}>${carStageHTML(m, null)}<span><b>${esc(m.name)}</b><small>${busy(c) ? 'Out on a job' : cur ? `Swaps out ${esc(cur.t)}` : 'No plate yet'}</small></span>${prestHTML(m.prest)}</button>`; }).join('')}</div>`;
+};
+MODALS.fitPick = id => {
+  const c = S.cars.find(x => x.id === +id); if (!c) return null;
+  const list = S.owned.filter(o => !o.dud && !o.lot && carOf(o) !== c).sort((x, y) => mv(y.t) - mv(x.t));
+  if (!list.length) return `${X_BTN}<h2 id="sheet-h">No plates free</h2><p>Buy a plate on the street, at auction or from a pack first.</p>`;
+  return `${X_BTN}<h2 id="sheet-h">Fit a plate to the ${esc(carModel(c.m).name)}</h2>
+    <div class="picks">${list.map(o => { const a = appraise(o.t), on = carOf(o); return `<button type="button" class="pick" data-act="mount-pick" data-car="${c.id}" data-pid="${o.id}" ${on && busy(on) ? 'disabled' : ''}>${plateHTML(o.t)}<span><b>${gbp(mv(o.t))}</b><small>${on ? `Moves off the ${esc(carModel(on.m).name)}` : a.custom ? 'Custom' : 'Normal'}</small></span>${tierChip(a.tier)}</button>`; }).join('')}</div>`;
+};
+MODALS.jobPick = id => {
+  const j = S.jobs.find(x => x.id === +id); if (!j || j.state !== 'open') return null;
+  const e = evOf(j);
+  return `${X_BTN}<h2 id="sheet-h">${esc(e.n)} for ${esc(j.who)}</h2><p class="say">“${esc(e.desc)}”</p>
+    <div class="picks">${S.cars.map(c => { const m = carModel(c.m), why = canDo(j, c), q = why ? null : jobPay(j, c); return `<button type="button" class="pick carpick" data-act="job-pick" data-job="${j.id}" data-car="${c.id}" ${why ? 'disabled' : ''}>${carStageHTML(m, plateOn(c))}<span><b>${esc(m.name)}</b><small>${why ? esc(why) : `Wearing ${esc(plateOn(c).t)}${q.bonus ? ' · plate bonus' : ''}`}</small></span>${q ? `<b>${gbp(q.pay)}</b>` : ''}</button>`; }).join('')}</div>
+    <p class="fine">The car is away for ${fmtCd(j.dur)}. There’s a small chance of a repair bill.</p>`;
+};
+MODALS.carBuy = id => {
+  const m = carModel(id); if (!m) return null;
+  return `${X_BTN}<h2 id="sheet-h">Buy the ${esc(m.name)}</h2><div class="stage-wrap">${carStageHTML(m, null)}</div>
+    <dl class="kv three"><div><dt>Price</dt><dd>${gbp(m.price)}</dd></div><div><dt>Prestige</dt><dd>${m.prest} / 10</dd></div><div><dt>Type</dt><dd class="txt">${BODY_NAME[m.body]}</dd></div></dl>
+    <p class="fine">You’ll have ${gbp(avail() - m.price)} left. It sells back for ${gbp(carResale(m))}.</p>
+    <div class="acts"><button type="button" class="btn ghost" data-act="close">Cancel</button><button type="button" class="btn pri" data-act="car-buy-go" data-id="${m.id}" ${avail() >= m.price ? '' : 'disabled'}>Buy for ${gbp(m.price)}</button></div>`;
+};
+MODALS.carSell = id => {
+  const c = S.cars.find(x => x.id === +id); if (!c) return null;
+  const m = carModel(c.m), o = plateOn(c);
+  return `${X_BTN}<h2 id="sheet-h">Sell the ${esc(m.name)}?</h2>${carStageHTML(m, o)}
+    <p>The dealer pays ${gbp(carResale(m))}.${o ? ` ${esc(o.t)} comes off and goes back in your garage.` : ''}</p>
+    <div class="acts"><button type="button" class="btn ghost" data-act="close">Keep it</button><button type="button" class="btn danger" data-act="car-sell-go" data-id="${c.id}">Sell for ${gbp(carResale(m))}</button></div>`;
+};
 MODALS.settings = () => `${X_BTN}<h2 id="sheet-h">Settings</h2>
   <div class="toggle-row"><span>Sound</span><div class="seg"><button type="button" data-act="set-sound" data-v="1" aria-pressed="${P.sound}">On</button><button type="button" data-act="set-sound" data-v="0" aria-pressed="${!P.sound}">Off</button></div></div>
   <div class="toggle-row"><span>Plate colour</span><div class="seg"><button type="button" data-act="set-plate" data-v="yellow" aria-pressed="${P.plate === 'yellow'}">Yellow</button><button type="button" data-act="set-plate" data-v="white" aria-pressed="${P.plate === 'white'}">White</button></div></div>
   <div class="toggle-row"><span>Theme</span><div class="seg">${['auto', 'dark', 'light'].map(v => `<button type="button" data-act="set-theme" data-v="${v}" aria-pressed="${P.theme === v}">${v === 'auto' ? 'System' : v[0].toUpperCase() + v.slice(1)}</button>`).join('')}</div></div>
-  <div class="toggle-row"><span>Start a new game</span>${UI.confirmNew ? '<span class="row"><button type="button" class="btn sm ghost" data-act="new-no">Cancel</button><button type="button" class="btn sm danger" data-act="new-yes">Yes, wipe my save</button></span>' : '<button type="button" class="btn sm" data-act="new-game">New game</button>'}</div>`;
-
-function endDay() {
-  if (S.over) return;
-  const r = { day: S.day, lines: [] };
-  for (const o of S.owned.filter(x => x.auction)) {
-    if (Math.random() < .15) { o.auction = false; r.lines.push([`${o.t} didn’t sell at auction`, 0, 'No bids']); log(`${o.t} unsold at auction`, 0); continue; }
-    const m = mv(o.t), hammer = roundNice(m * clamp(Math.exp(gauss() * .35), .6, 1.6)), net = Math.round(hammer * (1 - AUCTION_FEE));
-    sellPlate(o, net, 'at auction', `Hammer ${gbp(hammer)}, fee ${gbp(hammer - net)}`);
-    r.lines.push([`${o.t} sold at auction for ${gbp(hammer)}, less the fee`, net]);
-  }
-  if (S.cash >= RENT) { S.cash -= RENT; r.lines.push(['Lock-up rent', -RENT]); log('Lock-up rent', -RENT); }
-  else { const short = RENT - S.cash; S.cash = 0; S.debt += short; r.lines.push(['Lock-up rent (couldn’t pay, added to debt)', -RENT]); log('Rent added to debt', 0, gbp(short)); }
-  if (S.debt > 0 && !S.cleared) {
-    const int = Math.round(S.debt * RATE * 100) / 100;
-    S.debt = Math.round((S.debt + int) * 100) / 100;
-    r.lines.push(['Del’s interest (added to what you owe)', -Math.round(int)]);
-  }
-  if (!S.cleared && S.day >= DEADLINE && S.debt > 0) { S.over = true; save(); showModal('over'); return; }
-  S.day++;
-  newTrend(); newStreet();
-  S.stats.peak = Math.max(S.stats.peak, S.cash + collectionValue() - S.debt);
-  render();
-  showModal('day', r);
-}
-function repay(x) {
-  x = Math.min(Math.round(x), S.cash, Math.ceil(S.debt));
-  if (!(x > 0)) { toast('Enter an amount you can afford.'); return; }
-  S.cash -= x; S.debt = Math.max(0, Math.round((S.debt - x) * 100) / 100);
-  log('Paid Del', -x, S.debt > 0 ? `${gbp(S.debt)} still owed` : 'Debt cleared');
-  SFX.cash();
-  if (S.debt <= 0) { S.debt = 0; S.cleared = S.day; render(); showModal('win'); burstConfetti(); return; }
-  toast(`Paid Del ${gbp(x)}. ${gbp(S.debt)} to go.`);
-  closeModal();
-}
+  <div class="toggle-row"><span>Start over</span>${UI.confirmNew ? '<span class="row"><button type="button" class="btn sm ghost" data-act="new-no">Cancel</button><button type="button" class="btn sm danger" data-act="new-yes">Yes, wipe my save</button></span>' : '<button type="button" class="btn sm" data-act="new-game">New game</button>'}</div>`;
 
 /* ================================================================
    Pack opening stage
@@ -1366,27 +1906,26 @@ const FX = (() => {
 const STAGE_COLORS = ['#9aa5b1', '#46c98e', '#4f9cff', '#b37dff', '#ffae35', '#ff5280'];
 function burstConfetti() {
   let c = $('#ov canvas');
-  if (!c) { c = document.createElement('canvas'); c.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:90'; document.body.appendChild(c); setTimeout(() => c.remove(), 4000); }
+  if (!c || $('#ov').hidden) { c = document.createElement('canvas'); c.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:90'; document.body.appendChild(c); setTimeout(() => c.remove(), 4000); }
   FX.attach(c); FX.burst(innerWidth / 2, innerHeight / 3, ['#f7c52a', '#46c98e', '#4f9cff', '#ff5280'], 140);
 }
-
 const OPEN = { pack: null, items: [], flipped: 0 };
 function buyPack(id) {
   const p = PACKS.find(x => x.id === id); if (!p) return;
   if (p.starter && !S.starter) return;
-  if (S.cash < p.price) { toast(`You need ${gbp(p.price - S.cash)} more.`); return; }
+  if (avail() < p.price) { toast(`You need ${gbp(p.price - avail())} more.`); return; }
   S.cash -= p.price;
   if (p.starter) S.starter = false;
   const ex = ownedSet(), per = Math.round(p.price / p.slots.length);
   const items = p.slots.map(odds => {
     const tier = wpick([0, 1, 2, 3, 4, 5], odds);
     const t = rollPlate(p.pool, tier, ex); ex.add(t);
-    const a = appraise(t), o = { id: nid(), t, paid: per, day: S.day, dud: false, lock: false, auction: false, src: p.name };
+    const a = appraise(t), o = { id: nid(), t, paid: per, dud: false, lock: false, src: `a ${p.name}`, lot: null };
     S.owned.push(o);
     if (!S.stats.best || a.v > S.stats.best.v) S.stats.best = { t, v: a.v };
     return { o, a };
   });
-  S.stats.packs++;
+  S.stats.packs++; addRep(2);
   log(`Opened a ${p.name}`, -p.price, items.map(i => i.a.t).join(', '));
   save();
   OPEN.pack = p; OPEN.items = items; OPEN.flipped = 0;
@@ -1410,14 +1949,14 @@ function tearPack() {
       pk.remove();
       const cards = $('.cards', ov);
       cards.innerHTML = OPEN.items.map((it, i) => {
-        const tier = it.a.tier, last = i === OPEN.items.length - 1;
+        const tier = it.a.tier, last = i === OPEN.items.length - 1, d = describe(it.a.p);
         return `<button type="button" class="card${last && tier >= 3 ? ' tease' : ''}${tier === 5 ? ' myth' : ''}" style="--tc:var(--s${tier});animation-delay:${i * 120}ms" data-act="flip" data-i="${i}" aria-label="Reveal plate ${i + 1}">
           <span class="ci"><span class="face back"><span>REG</span></span>
-          <span class="face front"><span class="tier" style="--tc:var(--s${tier})">${TIERS[tier].name}</span>${plateHTML(it.a.t)}<span><span class="cv">${gbp(mv(it.a.t))}</span><br><small>${it.a.custom ? 'Custom' : 'Normal'} · ${describe(it.a.p).fmt} · ${describe(it.a.p).when}</small></span></span></span></button>`;
+          <span class="face front"><span class="tier" style="--tc:var(--s${tier})">${TIERS[tier].name}</span>${plateHTML(it.a.t)}<span><span class="cv">${gbp(mv(it.a.t))}</span><br><small>${it.a.custom ? 'Custom' : 'Normal'} · ${d.fmt} · ${d.when}</small></span></span></span></button>`;
       }).join('');
       cards.hidden = false;
       $('#ov-msg').textContent = 'Tap each plate to flip it';
-      $('#ov-bot').innerHTML = `<button type="button" class="btn" data-act="reveal-all">Flip them all</button>`;
+      $('#ov-bot').innerHTML = '<button type="button" class="btn" data-act="reveal-all">Flip them all</button>';
     }, reduceMotion.matches ? 0 : 380);
   }, reduceMotion.matches ? 0 : 480);
 }
@@ -1425,40 +1964,130 @@ function flipCard(i) {
   const ov = $('#ov'), c = $(`.card[data-i="${i}"]`, ov);
   if (!c || c.classList.contains('flipped')) return;
   c.classList.add('flipped'); c.classList.remove('tease');
-  const it = OPEN.items[i], tier = it.a.tier;
-  SFX.flip(tier);
-  OPEN.flipped++;
-  if (tier >= 3) {
-    const r = c.getBoundingClientRect();
-    setTimeout(() => FX.burst(r.left + r.width / 2, r.top + r.height / 2, STAGE_COLORS[tier], 30 + tier * 20), 250);
-  }
+  const tier = OPEN.items[i].a.tier;
+  SFX.flip(tier); OPEN.flipped++;
+  if (tier >= 3) { const r = c.getBoundingClientRect(); setTimeout(() => FX.burst(r.left + r.width / 2, r.top + r.height / 2, STAGE_COLORS[tier], 30 + tier * 20), 250); }
   if (tier >= 4 && !reduceMotion.matches) { const f = $('.flash', ov); f.style.setProperty('--tc', STAGE_COLORS[tier]); f.classList.remove('go'); void f.offsetWidth; f.classList.add('go'); }
   if (OPEN.flipped === OPEN.items.length) setTimeout(packSummary, 500);
 }
-function revealAll() {
-  OPEN.items.forEach((_, i) => setTimeout(() => flipCard(i), i * 380));
-}
+const revealAll = () => OPEN.items.forEach((_, i) => setTimeout(() => flipCard(i), i * 380));
 function packSummary() {
   const total = OPEN.items.reduce((s, it) => s + mv(it.a.t), 0);
-  const commons = OPEN.items.filter(it => it.a.tier === 0 && S.owned.some(o => o.id === it.o.id));
+  const commons = OPEN.items.filter(it => it.a.tier === 0 && plateById(it.o.id));
   const cv = commons.reduce((s, it) => s + Math.round(mv(it.a.t) * DEALER), 0);
   const p = OPEN.pack, net = total - p.price;
   $('#ov-msg').textContent = 'All plates are in your garage';
   $('#ov-bot').innerHTML = `<p class="sum">Pack value <b>${gbp(total)}</b> · paid <b>${p.price ? gbp(p.price) : 'nothing'}</b> · <b style="color:${net >= 0 ? 'var(--s1)' : 'var(--s5)'}">${net >= 0 ? '+' : ''}${gbp(net)}</b></p>
     <div class="row" style="justify-content:center">${commons.length ? `<button type="button" class="btn" data-act="pack-sell-commons">Sell commons to the dealer · ${gbp(cv)}</button>` : ''}<button type="button" class="btn pri" data-act="pack-done">Done</button></div>`;
-  const bot = $('#ov-bot .btn.pri'); if (bot) bot.focus({ preventScroll: true });
+  const b = $('#ov-bot .btn.pri'); if (b) b.focus({ preventScroll: true });
 }
-function closePack() {
-  const ov = $('#ov'); ov.hidden = true; ov.innerHTML = '';
-  document.documentElement.style.overflow = '';
-  OPEN.pack = null; render();
-}
+function closePack() { const ov = $('#ov'); ov.hidden = true; ov.innerHTML = ''; document.documentElement.style.overflow = ''; OPEN.pack = null; render(); }
 
-/* Squeeze plate characters to fit the plate, whatever font loaded. */
+/* ================================================================
+   Cruise
+   ================================================================ */
+let rideRAF = 0;
+function skyline(seed, H, body, win, winA, winP, minH, maxH) {
+  const rng = mulberry32(seed); let x = 0, s = '';
+  while (x < 1200) {
+    const w = 40 + rng() * 90, h = H * (minH + rng() * (maxH - minH)), y = H - h;
+    s += `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${(w + 1).toFixed(1)}" height="${h.toFixed(1)}" fill="${body}"/>`;
+    if (rng() < .16) s += `<rect x="${(x + w / 2).toFixed(1)}" y="${(y - 18).toFixed(1)}" width="2" height="18" fill="${body}"/>`;
+    if (winA > 0) for (let wy = y + 10; wy < H - 12; wy += 14) for (let wx = x + 8; wx < x + w - 10; wx += 12) if (rng() < winP) s += `<rect x="${wx.toFixed(1)}" y="${wy.toFixed(1)}" width="5" height="7" fill="${win}" fill-opacity="${(winA * (.45 + rng() * .55)).toFixed(2)}"/>`;
+    x += w + rng() * 6;
+  }
+  return "url('data:image/svg+xml;utf8," + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="${H}" viewBox="0 0 1200 ${H}">${s}</svg>`) + "')";
+}
+function rideOutcome(car) {
+  const m = carModel(car.m), o = plateOn(car), a = o ? appraise(o.t) : null;
+  const T = a ? a.tier : -1, score = m.prest + (T + 1) * 1.5, pl = o ? o.t : 'your car';
+  const opts = [['quiet', Math.max(4, 26 - score * 1.3)], ['tips', 18], ['viral', 5 + score * .7], ['job', 7], ['seller', 7], ['pothole', 6], ['ticket', 4]];
+  if (a && !o.lock) opts.push(['offer', 10 + T * 3]);
+  const k = wpick(opts.map(x => x[0]), opts.map(x => x[1]));
+  const r = { k, cash: 0, rep: 0, tier: Math.max(0, T) };
+  if (k === 'quiet') Object.assign(r, { title: 'A quiet lap of the high street', text: `A couple of people looked twice at ${pl}. That’s about it.`, rep: 1 });
+  if (k === 'tips') Object.assign(r, { title: 'Someone paid to film it', text: `A content creator asked to shoot the ${m.name} wearing ${pl} for their channel.`, cash: roundNice(25 * 1.42 ** score * rand(.7, 1.3)), rep: 2 });
+  if (k === 'viral') Object.assign(r, { title: 'Your car went viral', text: `A clip of ${pl} on the ${m.name} hit a million views overnight.`, rep: Math.round(10 + score * 5) });
+  if (k === 'job') Object.assign(r, { title: 'Someone asked if you do hire', text: `A woman at the traffic lights loved the ${m.name}. Her booking is waiting in Hire, and it pays extra.`, rep: 3 });
+  if (k === 'seller') Object.assign(r, { title: 'A tip-off at the petrol station', text: 'A bloke at pump four says he has an old plate he wants rid of. He’s waiting on the street now.', rep: 2 });
+  if (k === 'pothole') Object.assign(r, { title: 'Pothole on the ring road', text: `The ${m.name} hit a crater. The garage wants paying.`, cash: -Math.max(40, roundNice(Math.max(m.price, 3000) * .008)) });
+  if (k === 'ticket') Object.assign(r, { title: 'Bus lane fine', text: 'A camera caught you in a bus lane. The council wants £70.', cash: -70 });
+  if (k === 'offer') {
+    const buyer = pick(['A footballer', 'A rapper', 'A property developer', 'A collector in a Bentley', 'A TV chef']);
+    Object.assign(r, { title: `${buyer} flagged you down`, text: `They love ${pl} and offered cash for it on the spot. They’ll take it off the car right now.`, offer: roundNice(mv(o.t) * rand(1.15, 1.75)), pid: o.id, rep: 2 });
+  }
+  return r;
+}
+function applyRide(r, car) {
+  S.stats.rides++;
+  if (r.cash) { S.cash = Math.max(0, S.cash + r.cash); log(r.title, r.cash); r.cash > 0 ? SFX.cash() : SFX.bad(); }
+  if (r.rep) addRep(r.rep);
+  if (r.k === 'job') S.jobs.unshift(newJob({ premium: true }));
+  if (r.k === 'seller') S.sellers.unshift(newSeller({ type: 'clueless', boost: true }));
+  mark('all');
+}
+function startRide(id) {
+  const car = S.cars.find(c => c.id === +id); if (!car) return;
+  if (busy(car)) { toast('That car is out on a job.'); return; }
+  if (S.rideReady > NOW()) { toast(`You can cruise again in ${fmtCd(S.rideReady - NOW())}.`); return; }
+  const m = carModel(car.m), o = plateOn(car), d = $('#ride');
+  S.rideReady = NOW() + RIDE_CD + 4500;
+  const night = (document.documentElement.dataset.theme || (matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark')) === 'dark';
+  d.className = 'ride ' + (night ? 'night' : 'day');
+  const far = night ? skyline(11, 300, '#161c30', '#ffd59a', .35, .1, .4, .95) : skyline(11, 300, '#a9b8cb', '#ffffff', 0, 0, .4, .95);
+  const mid = night ? skyline(23, 260, '#0f1424', '#ffcf7a', .85, .32, .3, .9) : skyline(23, 260, '#7f90a6', '#dfe9f6', .5, .25, .3, .9);
+  const near = night ? skyline(37, 200, '#080b14', '#ffc56a', .9, .3, .2, .7) : skyline(37, 200, '#5d6b80', '#e7eef8', .45, .25, .2, .7);
+  d.innerHTML = `<div class="scene"><div class="sky"></div><div class="stars"></div><div class="orb"></div>
+    <div class="sk far" style="background-image:${far}"></div><div class="sk mid" style="background-image:${mid}"></div><div class="sk near" style="background-image:${near}"></div>
+    <div class="road"><div class="dash"></div></div>
+    <div class="ride-car"><div class="beam"></div>${carStageHTML(m, o)}</div>
+    <button type="button" class="icon-btn ride-x" data-act="ride-close" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    <div class="ride-card" hidden></div></div>`;
+  d.hidden = false; document.documentElement.style.overflow = 'hidden';
+  SFX.engine();
+  const layers = [['.sk.far', 14, 300], ['.sk.mid', 46, 260], ['.sk.near', 120, 200], ['.dash', 520, 0]].map(([s, v, h]) => {
+    const el = $(s, d), L = { el, v, off: 0 };
+    L.tile = h ? Math.max(200, 1200 * el.offsetHeight / h) : 160;
+    el.style.width = ((Math.ceil(innerWidth / L.tile) + 1) * L.tile) + 'px';
+    return L;
+  });
+  const wheels = $$('.ride-car .wheel', d), T_IN = 900, T_CRUISE = 3300, T_END = 4300, t0 = performance.now();
+  let last = t0, ang = 0, revealed = false;
+  cancelAnimationFrame(rideRAF);
+  const step = now => {
+    const tt = now - t0, dt = Math.min(50, now - last); last = now;
+    let f = tt < T_IN ? tt / T_IN : tt < T_CRUISE ? 1 : Math.max(.08, 1 - (tt - T_CRUISE) / (T_END - T_CRUISE) * .92);
+    if (reduceMotion.matches) f = 0;
+    layers.forEach(L => { L.off = (L.off + L.v * f * dt / 1000) % L.tile; L.el.style.transform = `translate3d(${(-L.off).toFixed(1)}px,0,0)`; });
+    ang = (ang + 760 * f * dt / 1000) % 360;
+    wheels.forEach(w => w.setAttribute('transform', `rotate(${ang.toFixed(1)} ${w.dataset.cx} ${w.dataset.cy})`));
+    if (!revealed && tt >= (reduceMotion.matches ? 500 : T_END)) { revealed = true; revealRide(d, car); }
+    rideRAF = requestAnimationFrame(step);
+  };
+  rideRAF = requestAnimationFrame(step);
+}
+function revealRide(d, car) {
+  const r = rideOutcome(car); UI.ride = r;
+  applyRide(r, car);
+  const card = $('.ride-card', d), m = carModel(car.m);
+  card.style.setProperty('--g', r.cash < 0 ? 'var(--s5)' : `var(--s${r.k === 'offer' || r.k === 'viral' ? Math.max(3, r.tier) : r.tier})`);
+  const result = r.offer ? `<b>${gbp(r.offer)}</b>` : r.cash ? `<b>${r.cash > 0 ? '+' : '−'}${gbp(Math.abs(r.cash))}</b>` : `<b>+${r.rep} rep</b>`;
+  card.innerHTML = `<span class="rk"><i></i>${esc(m.name)}</span><h3>${esc(r.title)}</h3><p>${esc(r.text)}</p>
+    <div class="rr"><span>${r.offer ? `Market value ${gbp(mv(plateById(r.pid).t))}` : r.rep && (r.cash || r.offer) ? `+${r.rep} rep` : 'Cruise over'}</span>${result}</div>
+    <div class="acts">${r.offer ? `<button type="button" class="btn" data-act="ride-offer-no">Keep it</button><button type="button" class="btn pri" data-act="ride-offer-yes">Sell for ${gbp(r.offer)}</button>` : '<button type="button" class="btn pri" data-act="ride-close">Done</button>'}</div>`;
+  card.hidden = false;
+  const f = $('.btn.pri', card); if (f) f.focus({ preventScroll: true });
+}
+function closeRide() { cancelAnimationFrame(rideRAF); const d = $('#ride'); d.hidden = true; d.innerHTML = ''; document.documentElement.style.overflow = ''; UI.ride = null; checkSets(); render(); }
+
+/* ================================================================
+   Toast and plate fitting
+   ================================================================ */
+let toastT = 0;
+function toast(s) { const el = $('#toast'); el.textContent = s; el.classList.add('on'); clearTimeout(toastT); toastT = setTimeout(() => el.classList.remove('on'), 2800); }
 function fitPlates() {
   $$('.pl .txt').forEach(el => {
-    const box = el.parentElement, avail = box.clientWidth - 4;
-    if (!avail) return;
+    const avail = el.parentElement.clientWidth - 4; if (!avail) return;
     const need = el.scrollWidth;
     el.style.setProperty('--k', need > avail ? (avail / need).toFixed(3) : '1');
   });
@@ -1470,54 +2099,87 @@ addEventListener('resize', queueFit);
 if (document.fonts && document.fonts.ready) document.fonts.ready.then(queueFit);
 
 /* ================================================================
-   Toast
-   ================================================================ */
-let toastT = 0;
-function toast(s) { const el = $('#toast'); el.textContent = s; el.classList.add('on'); clearTimeout(toastT); toastT = setTimeout(() => el.classList.remove('on'), 2600); }
-
-/* ================================================================
    Actions
    ================================================================ */
 const val = sel => +(($(sel) || {}).value || 0);
 const ACT = {
   tab: b => { UI.tab = b.dataset.tab; render(); scrollTo({ top: 0 }); },
+  gsub: b => { UI.gsub = b.dataset.v; render(); },
+  ssub: b => { UI.ssub = b.dataset.v; render(); },
+  goto: b => { UI.tab = b.dataset.tab; if (b.dataset.sub) { if (UI.tab === 'garage') UI.gsub = b.dataset.sub; else UI.ssub = b.dataset.sub; } if (UI.modal) closeModal(); else render(); scrollTo({ top: 0 }); },
   close: () => closeModal(),
+  'intro-ok': () => { S.intro = false; render(); },
   haggle: b => showModal('buy', b.dataset.id),
   'set-offer': b => { $('#offer-in').value = b.dataset.v; },
-  offer: b => { const s = sellerById(b.dataset.id); sellerRespond(s, val('#offer-in')); render(); drawModal('#offer-in'); },
+  offer: b => { sellerRespond(sellerById(b.dataset.id), val('#offer-in')); render(); drawModal('#offer-in'); },
   'pay-ask': b => { const s = sellerById(b.dataset.id); buyFrom(s, s.counter); s.msg = pick(SAY.yes); render(); drawModal(); },
   check: b => {
     const s = sellerById(b.dataset.id); if (s.check) return;
-    if (!S.upg.hpi) { if (S.cash < CHECK_FEE) { toast(`A check costs ${gbp(CHECK_FEE)}.`); return; } S.cash -= CHECK_FEE; log(`History check on ${s.t}`, -CHECK_FEE); }
+    if (!S.upg.hpi) { if (avail() < CHECK_FEE) { toast(`A check costs ${gbp(CHECK_FEE)}.`); return; } S.cash -= CHECK_FEE; log(`History check on ${s.t}`, -CHECK_FEE); }
     s.check = s.dodgy ? 'dodgy' : 'clean';
     s.msg = s.dodgy ? 'What? That check’s wrong. It’s all legit, I swear.' : (s.type === 'shifty' ? 'Told you it was legit.' : 'Check away, it’s all above board.');
     s.mood = s.dodgy ? 'bad' : 'good';
-    if (s.dodgy) SFX.bad(); else SFX.click();
+    s.dodgy ? SFX.bad() : SFX.click();
     render(); drawModal();
   },
-  walk: b => { const s = sellerById(b.dataset.id); s.state = 'gone'; s.msg = 'Suit yourself.'; closeModal(); },
+  walk: b => { const s = sellerById(b.dataset.id); s.state = 'gone'; s.doneAt = NOW(); closeModal(); },
   'sell-open': b => showModal('sellPick', b.dataset.id),
-  'sell-pick': b => { const bu = buyerById(b.dataset.id); startSell(bu, b.dataset.pid); showModal('sell', bu.id); },
+  'sell-pick': b => { const c = clientById(b.dataset.id); startSell(c, b.dataset.pid); showModal('sell', c.id); },
   'set-ask': b => { $('#ask-in').value = b.dataset.v; },
-  ask: b => { const bu = buyerById(b.dataset.id); buyerRespond(bu, val('#ask-in')); render(); drawModal('#ask-in'); },
-  'take-offer': b => { const bu = buyerById(b.dataset.id); buyerRespond(bu, bu.deal.offer); render(); drawModal(); },
-  'sell-walk': b => { const bu = buyerById(b.dataset.id); bu.state = 'gone'; bu.deal = null; closeModal(); },
-  'goto-garage': () => { UI.tab = 'garage'; closeModal(); },
+  ask: b => { clientRespond(clientById(b.dataset.id), val('#ask-in')); render(); drawModal('#ask-in'); },
+  'take-offer': b => { const c = clientById(b.dataset.id); clientRespond(c, c.deal.offer); render(); drawModal(); },
+  'sell-walk': b => { const c = clientById(b.dataset.id); c.state = 'gone'; c.doneAt = NOW(); c.deal = null; closeModal(); },
   detail: b => showModal('detail', b.dataset.id),
-  lock: b => { const o = S.owned.find(x => x.id === +b.dataset.id); o.lock = !o.lock; if (o.lock) o.auction = false; render(); drawModal(); },
-  auction: b => { const o = S.owned.find(x => x.id === +b.dataset.id); o.auction = !o.auction; toast(o.auction ? `${o.t} goes under the hammer tonight.` : `${o.t} is out of the auction.`); render(); drawModal(); },
+  lock: b => { const o = plateById(+b.dataset.id); o.lock = !o.lock; render(); drawModal(); },
   dealer: b => {
-    const o = S.owned.find(x => x.id === +b.dataset.id); if (!o) return;
+    const o = plateById(+b.dataset.id); if (!o || plateLocked(o)) return;
     const price = Math.round(mv(o.t) * DEALER);
     sellPlate(o, price, 'to the dealer'); toast(`Sold ${o.t} to the dealer for ${gbp(price)}.`); closeModal();
   },
-  scrap: b => { const o = S.owned.find(x => x.id === +b.dataset.id); S.owned = S.owned.filter(x => x !== o); log(`Scrapped cloned plate ${o.t}`, 0); closeModal(); },
+  scrap: b => { const o = plateById(+b.dataset.id); S.cars.forEach(c => { if (c.plate === o.id) c.plate = null; }); S.owned = S.owned.filter(x => x !== o); log(`Scrapped cloned plate ${o.t}`, 0); closeModal(); },
   'sell-commons': () => {
-    const list = S.owned.filter(o => !o.lock && !o.auction && !o.dud && appraise(o.t).tier === 0);
+    const list = S.owned.filter(o => !o.lock && !o.dud && !plateLocked(o) && !carOf(o) && appraise(o.t).tier === 0);
     let sum = 0; list.forEach(o => { const p = Math.round(mv(o.t) * DEALER); sum += p; sellPlate(o, p, 'to the dealer'); });
     toast(`Sold ${list.length} plates to the dealer for ${gbp(sum)}.`); render();
   },
   gfilter: b => { UI.gFilter = b.dataset.v; render(); },
+  'list-auction': b => showModal('auctionSell', b.dataset.id),
+  'set-reserve': b => { $('#reserve-in').value = b.dataset.v; },
+  'list-go': b => {
+    const o = plateById(+b.dataset.id); if (!o || plateLocked(o)) return;
+    S.cars.forEach(c => { if (c.plate === o.id) c.plate = null; });
+    const m = mv(o.t), boost = appraise(o.t).cats.has(S.trend.hot) ? 1 : 0;
+    const lot = { id: nid(), t: o.t, est: [roundNice(m * .8), roundNice(m * 1.2)], start: roundNice(Math.max(5, m * .3)), cur: 0, hasBid: false, lead: null, leadName: '', bids: [],
+      ends: NOW() + 90000, bidders: makeBidders(m, ri(2, 6) + boost), mine: true, pid: o.id, reserve: Math.max(0, Math.round(val('#reserve-in'))), done: false, myMax: 0 };
+    S.lots.unshift(lot); o.lot = lot.id; log(`Listed ${o.t} at live auction`, 0, lot.reserve ? `Reserve ${gbp(lot.reserve)}` : 'No reserve');
+    UI.tab = 'auctions'; closeModal(); toast(`${o.t} is under the hammer. 90 seconds.`);
+  },
+  bid: b => {
+    const lot = S.lots.find(l => l.id === +b.dataset.id); if (!lot || lot.done || lot.lead === 'you') return;
+    const next = nextBid(lot);
+    if (avail() < next) { toast(`You need ${gbp(next - avail())} more to bid.`); return; }
+    placeBid(lot, 'You', next, true); SFX.bid(); lotLive(lot); renderHUD();
+  },
+  maxbid: b => showModal('maxbid', b.dataset.id),
+  'maxbid-go': b => {
+    const lot = S.lots.find(l => l.id === +b.dataset.id); if (!lot || lot.done) return;
+    const x = Math.round(val('#max-in')), next = nextBid(lot);
+    if (!(x >= next) && lot.lead !== 'you') { toast(`Your max has to be at least ${gbp(next)}.`); return; }
+    lot.myMax = x;
+    if (lot.lead !== 'you' && avail() >= next) { placeBid(lot, 'You', next, true); SFX.bid(); }
+    toast(`Max bid of ${gbp(x)} set on ${lot.t}.`); closeModal();
+  },
+  'maxbid-clear': b => { const lot = S.lots.find(l => l.id === +b.dataset.id); if (lot) lot.myMax = 0; closeModal(); },
+  'mount-plate': b => showModal('mountPick', b.dataset.id),
+  'fit-plate': b => showModal('fitPick', b.dataset.id),
+  'mount-pick': b => {
+    const car = S.cars.find(c => c.id === +b.dataset.car), o = plateById(+b.dataset.pid);
+    if (!car || !o || busy(car) || o.lot) return;
+    S.cars.forEach(c => { if (c.plate === o.id) c.plate = null; });
+    car.plate = o.id; SFX.click(); toast(`${o.t} is on the ${carModel(car.m).name}.`);
+    UI.tab = 'garage'; UI.gsub = 'cars'; checkSets(); closeModal();
+  },
+  unmount: b => { const car = S.cars.find(c => c.id === +b.dataset.id); if (car && !busy(car)) car.plate = null; if (UI.modal) closeModal(); else render(); },
   'pack-buy': b => buyPack(b.dataset.id),
   tear: () => tearPack(),
   flip: b => flipCard(+b.dataset.i),
@@ -1528,24 +2190,46 @@ const ACT = {
     let sum = 0; S.owned.filter(o => ids.has(o.id)).forEach(o => { const p = Math.round(mv(o.t) * DEALER); sum += p; sellPlate(o, p, 'to the dealer'); });
     b.disabled = true; b.textContent = `Sold for ${gbp(sum)}`; save();
   },
-  repay: () => showModal('repay'),
-  'set-repay': b => { $('#repay-in').value = b.dataset.v; },
-  'repay-go': () => repay(val('#repay-in')),
-  endday: () => { if (OPEN.pack) return; endDay(); },
+  'car-buy': b => showModal('carBuy', b.dataset.id),
+  'car-buy-go': b => {
+    const m = carModel(b.dataset.id); if (!m || avail() < m.price || S.cars.length >= CAR_SLOTS[S.upg.space] || S.cars.some(c => c.m === m.id)) return;
+    S.cash -= m.price; S.cars.push({ id: nid(), m: m.id, plate: null, busyUntil: 0, job: null });
+    log(`Bought a ${m.name}`, -m.price); addRep(Math.round(5 + m.prest * 4)); SFX.deal(); burstConfetti();
+    toast(`The ${m.name} is in your lock-up. Fit a plate to it.`); UI.tab = 'garage'; UI.gsub = 'cars'; checkSets(); closeModal();
+  },
+  'car-sell': b => showModal('carSell', b.dataset.id),
+  'car-sell-go': b => {
+    const c = S.cars.find(x => x.id === +b.dataset.id); if (!c || busy(c)) return;
+    const m = carModel(c.m), p = carResale(m);
+    S.cash += p; S.cars = S.cars.filter(x => x !== c); log(`Sold the ${m.name}`, p); SFX.cash(); closeModal();
+  },
+  cruise: b => startRide(b.dataset.id),
+  'ride-close': () => closeRide(),
+  'ride-offer-yes': () => {
+    const r = UI.ride, o = r && plateById(r.pid);
+    if (o && !plateLocked(o)) { sellPlate(o, r.offer, 'on the street', 'Offer during a cruise'); addRep(4 + 3 * appraise(o.t).tier); toast(`Sold ${o.t} for ${gbp(r.offer)}.`); }
+    closeRide();
+  },
+  'ride-offer-no': () => { toast('You kept the plate.'); closeRide(); },
+  'job-take': b => showModal('jobPick', b.dataset.id),
+  'job-pick': b => {
+    const j = S.jobs.find(x => x.id === +b.dataset.job), car = S.cars.find(c => c.id === +b.dataset.car);
+    if (!j || !car || j.state !== 'open' || canDo(j, car)) return;
+    startJob(j, car); closeModal();
+  },
   upgrade: b => {
     const u = UPGRADES.find(x => x.k === b.dataset.k), l = S.upg[u.k], c = u.cost[l];
-    if (c == null || S.cash < c) return;
+    if (c == null || avail() < c) return;
     S.cash -= c; S.upg[u.k]++; log(`Bought ${u.name}${u.cost.length > 1 ? ' ' + (l + 1) : ''}`, -c); SFX.deal();
-    toast(`${u.name} upgraded. ${u.k === 'contacts' ? 'More sellers from tomorrow.' : ''}`); render();
+    toast(`${u.name} upgraded.`); render();
   },
   'studio-fmt': b => { UI.studioFmt = b.dataset.v; UI.studioText = ''; render(); },
   'studio-idea': b => { const a = appraise(b.dataset.t); UI.studioFmt = a.p.f; UI.studioText = a.t; render(); },
   'studio-more': () => { studioIdeas(); render(); },
   'studio-buy': b => {
-    const q = studioQuote(b.dataset.t); if (!q || q.taken || q.owned || S.cash < q.price) return;
-    S.cash -= q.price;
-    S.owned.push({ id: nid(), t: q.a.t, paid: q.price, day: S.day, dud: false, lock: false, auction: false, src: 'the registration office' });
-    log(`Registered ${q.a.t}`, -q.price, 'Includes the £80 assignment fee');
+    const q = studioQuote(b.dataset.t); if (!q || q.taken || q.owned || avail() < q.price) return;
+    S.cash -= q.price; S.owned.push({ id: nid(), t: q.a.t, paid: q.price, dud: false, lock: false, src: 'the registration office', lot: null });
+    log(`Registered ${q.a.t}`, -q.price, 'Includes the £80 assignment fee'); addRep(3);
     SFX.deal(); toast(`${q.a.t} is yours. It’s in your garage.`); render();
   },
   settings: () => { UI.confirmNew = false; showModal('settings'); },
@@ -1554,7 +2238,7 @@ const ACT = {
   'set-theme': b => { P.theme = b.dataset.v; savePrefs(); applyTheme(); drawModal(); },
   'new-game': () => { UI.confirmNew = true; drawModal(); },
   'new-no': () => { UI.confirmNew = false; drawModal(); },
-  'new-yes': () => { UI.confirmNew = false; newGame(); UI.tab = 'street'; closeModal(); toast('New game. You owe Del £2,000.'); },
+  'new-yes': () => { UI.confirmNew = false; newGame(); UI.tab = 'deals'; closeModal(); toast('New game. Good luck.'); },
 };
 document.addEventListener('click', e => {
   const b = e.target.closest('[data-act]');
@@ -1562,31 +2246,29 @@ document.addEventListener('click', e => {
   const f = ACT[b.dataset.act];
   if (f) { e.preventDefault(); f(b, e); }
 });
-$('#modal').addEventListener('click', e => { if (e.target.id === 'modal' && UI.modal && UI.modal.type !== 'over' && UI.modal.type !== 'day' && UI.modal.type !== 'win') closeModal(); });
+$('#modal').addEventListener('click', e => { if (e.target.id === 'modal') closeModal(); });
 document.addEventListener('keydown', e => {
+  if (!$('#ride').hidden) { if (e.key === 'Escape' && $('.ride-card:not([hidden])')) closeRide(); return; }
   if (!$('#ov').hidden) {
     if (e.key === 'Escape') { if (OPEN.flipped === OPEN.items.length) closePack(); else if ($('.pack', $('#ov'))) tearPack(); else revealAll(); }
     return;
   }
-  if (e.key === 'Escape' && UI.modal && UI.modal.type !== 'over') { closeModal(); return; }
+  if (e.key === 'Escape' && UI.modal) { closeModal(); return; }
   if (e.key === 'Enter' && UI.modal && e.target.tagName === 'INPUT') {
     e.preventDefault();
-    const go = { 'offer-in': '[data-act="offer"]', 'ask-in': '[data-act="ask"]', 'repay-in': '[data-act="repay-go"]' }[e.target.id];
+    const go = { 'offer-in': '[data-act="offer"]', 'ask-in': '[data-act="ask"]', 'reserve-in': '[data-act="list-go"]', 'max-in': '[data-act="maxbid-go"]' }[e.target.id];
     if (go) { const b = $(go, $('#sheet')); if (b && !b.disabled) b.click(); }
   }
 });
 document.addEventListener('change', e => {
-  if (e.target.id === 'g-tier') { UI.gTier = e.target.value; render(); }
-  if (e.target.id === 'g-sort') { UI.gSort = e.target.value; render(); }
+  if (e.target.id === 'g-tier') { UI.gTier = e.target.value; e.target.blur(); render(); }
+  if (e.target.id === 'g-sort') { UI.gSort = e.target.value; e.target.blur(); render(); }
 });
-document.addEventListener('input', e => {
-  if (e.target.id === 'studio-in') { UI.studioText = e.target.value; studioUpdate(); }
-});
-
-function applyTheme() {
-  if (P.theme === 'auto') document.documentElement.removeAttribute('data-theme');
-  else document.documentElement.dataset.theme = P.theme;
-}
+document.addEventListener('input', e => { if (e.target.id === 'studio-in') { UI.studioText = e.target.value; studioUpdate(); } });
+document.addEventListener('focusout', () => setTimeout(flush, 0));
+addEventListener('pagehide', () => save());
+document.addEventListener('visibilitychange', () => { if (document.hidden) save(); else { catchUp(); render(); } });
+function applyTheme() { if (P.theme === 'auto') document.documentElement.removeAttribute('data-theme'); else document.documentElement.dataset.theme = P.theme; }
 
 /* ================================================================
    Boot
@@ -1594,13 +2276,13 @@ function applyTheme() {
 function boot(data) {
   const pr = load(PREF_KEY); if (pr) P = Object.assign(P, pr);
   applyTheme();
-  const saved = (data && valid(data.S) && data.S) || load(SAVE_KEY);
-  if (valid(saved)) { S = saved; if (!S.trend) newTrend(); } else newGame();
-  if (data && data.tab) UI.tab = data.tab;
+  const saved = (data && validV2(data.S) && data.S) || load(SAVE_KEY);
+  if (validV2(saved)) { S = saved; if (data && data.tab) UI.tab = data.tab; catchUp(); }
+  else { const old = load(OLD_KEY); if (old && Array.isArray(old.owned)) migrateV1(old); else newGame(); }
   render();
-  if (S.over) showModal('over');
+  setInterval(tick, 1000);
 }
-window.__rh = { appraise, rollPlate, PACKS, TIERS, mv, state: () => S };
+window.__rh = { appraise, rollPlate, PACKS, TIERS, mv, state: () => S, tick, catchUp };
 const hot = window.claude && window.claude.hot;
 if (hot && hot.snapshot) { try { hot.snapshot(() => ({ S, tab: UI.tab })); } catch (e) { /* not available */ } }
 if (hot && hot.ready) hot.ready(boot); else boot((hot && hot.data) || {});
